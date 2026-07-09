@@ -23,10 +23,16 @@ import { MarketController } from "./controllers/MarketController";
 const app = express();
 const PORT = 3000;
 const DB_PATH = path.join(process.cwd(), "data", "db.json");
+const PUBLIC_STORAGE_PATH = path.join(process.cwd(), "public");
+const SITE_URL = "https://porosmadura.com";
 
 // Ensure data directory exists
 if (!fs.existsSync(path.join(process.cwd(), "data"))) {
   fs.mkdirSync(path.join(process.cwd(), "data"));
+}
+
+if (!fs.existsSync(PUBLIC_STORAGE_PATH)) {
+  fs.mkdirSync(PUBLIC_STORAGE_PATH, { recursive: true });
 }
 
 // Ensure database file exists with seed data
@@ -457,7 +463,8 @@ let db = {
     { term: "LLM Indonesia", count: 1200 },
     { term: "Toraja Festival", count: 320 },
     { term: "Piala Dunia", count: 1450 }
-  ]
+  ],
+  sitemapStatus: null as any
 };
 
 const categoryImagePools: Record<string, string[]> = {
@@ -726,6 +733,217 @@ function saveDb() {
   } catch (err) {
     console.error("Failed to save db.json:", err);
   }
+}
+
+type SitemapOptions = {
+  includeArticles?: boolean;
+  includeCategories?: boolean;
+  includeTags?: boolean;
+  includeAuthors?: boolean;
+};
+
+type SitemapFileResult = {
+  name: string;
+  url: string;
+  path: string;
+  count: number;
+  updatedAt: string;
+};
+
+function escapeXml(value: unknown): string {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
+}
+
+function slugifySegment(value: string): string {
+  return value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-");
+}
+
+function isoDateOnly(value?: string): string {
+  const date = value ? new Date(value) : new Date();
+  if (Number.isNaN(date.getTime())) {
+    return new Date().toISOString().split("T")[0];
+  }
+  return date.toISOString().split("T")[0];
+}
+
+function getPublishedArticles() {
+  return [...(db.articles || [])]
+    .filter((article: any) => article.status === "published" && article.slug && article.category)
+    .sort((a: any, b: any) => new Date(b.publishDate || 0).getTime() - new Date(a.publishDate || 0).getTime());
+}
+
+function buildArticleUrl(article: any): string {
+  const category = slugifySegment(article.category || "artikel");
+  return `${SITE_URL}/${category}/${article.slug}`;
+}
+
+function buildUrlset(entries: Array<{ loc: string; lastmod?: string; changefreq?: string; priority?: string }>): string {
+  const urls = entries.map(entry => [
+    "  <url>",
+    `    <loc>${escapeXml(entry.loc)}</loc>`,
+    entry.lastmod ? `    <lastmod>${escapeXml(entry.lastmod)}</lastmod>` : "",
+    entry.changefreq ? `    <changefreq>${escapeXml(entry.changefreq)}</changefreq>` : "",
+    entry.priority ? `    <priority>${escapeXml(entry.priority)}</priority>` : "",
+    "  </url>"
+  ].filter(Boolean).join("\n"));
+
+  return [
+    `<?xml version="1.0" encoding="UTF-8"?>`,
+    `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`,
+    ...urls,
+    `</urlset>`
+  ].join("\n");
+}
+
+function buildSitemapIndex(files: SitemapFileResult[]): string {
+  return [
+    `<?xml version="1.0" encoding="UTF-8"?>`,
+    `<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`,
+    ...files.filter(file => file.name !== "sitemap.xml").map(file => [
+      "  <sitemap>",
+      `    <loc>${escapeXml(file.url)}</loc>`,
+      `    <lastmod>${escapeXml(file.updatedAt)}</lastmod>`,
+      "  </sitemap>"
+    ].join("\n")),
+    `</sitemapindex>`
+  ].join("\n");
+}
+
+function buildNewsSitemap(articles: any[]): string {
+  const latestNews = articles.slice(0, 1000).map(article => [
+    "  <url>",
+    `    <loc>${escapeXml(buildArticleUrl(article))}</loc>`,
+    "    <news:news>",
+    "      <news:publication>",
+    "        <news:name>Poros Madura</news:name>",
+    "        <news:language>id</news:language>",
+    "      </news:publication>",
+    `      <news:publication_date>${escapeXml(article.publishDate || new Date().toISOString())}</news:publication_date>`,
+    `      <news:title>${escapeXml(article.title)}</news:title>`,
+    "    </news:news>",
+    "  </url>"
+  ].join("\n"));
+
+  return [
+    `<?xml version="1.0" encoding="UTF-8"?>`,
+    `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">`,
+    ...latestNews,
+    `</urlset>`
+  ].join("\n");
+}
+
+function writeSitemapFile(name: string, xml: string, count: number): SitemapFileResult {
+  const targetPath = path.join(PUBLIC_STORAGE_PATH, name);
+  fs.writeFileSync(targetPath, xml, "utf8");
+  const updatedAt = new Date().toISOString();
+  return {
+    name,
+    url: `${SITE_URL}/${name}`,
+    path: targetPath,
+    count,
+    updatedAt
+  };
+}
+
+function generateSitemaps(options: SitemapOptions = {}) {
+  const includeArticles = options.includeArticles !== false;
+  const includeCategories = options.includeCategories !== false;
+  const includeTags = options.includeTags !== false;
+  const includeAuthors = options.includeAuthors !== false;
+  const articles = getPublishedArticles();
+  const latestArticleDate = isoDateOnly(articles[0]?.publishDate);
+
+  const pages = [
+    { loc: `${SITE_URL}/`, lastmod: latestArticleDate, changefreq: "always", priority: "1.0" },
+    { loc: `${SITE_URL}/admin`, lastmod: latestArticleDate, changefreq: "monthly", priority: "0.2" }
+  ];
+
+  const articleEntries = includeArticles ? articles.map((article: any) => ({
+    loc: buildArticleUrl(article),
+    lastmod: isoDateOnly(article.publishDate),
+    changefreq: "weekly",
+    priority: "0.8"
+  })) : [];
+
+  const categoryEntries = includeCategories ? (db.categories || []).map((category: string) => ({
+    loc: `${SITE_URL}/category/${slugifySegment(category)}`,
+    lastmod: latestArticleDate,
+    changefreq: "weekly",
+    priority: "0.6"
+  })) : [];
+
+  const uniqueTags = Array.from(new Set(articles.flatMap((article: any) => article.tags || []))).filter(Boolean) as string[];
+  const tagEntries = includeTags ? uniqueTags.map(tag => ({
+    loc: `${SITE_URL}/tag/${slugifySegment(tag)}`,
+    lastmod: latestArticleDate,
+    changefreq: "weekly",
+    priority: "0.4"
+  })) : [];
+
+  const uniqueAuthors = Array.from(new Set(articles.map((article: any) => article.author).filter(Boolean))) as string[];
+  const authorEntries = includeAuthors ? uniqueAuthors.map(author => ({
+    loc: `${SITE_URL}/author/${slugifySegment(author)}`,
+    lastmod: latestArticleDate,
+    changefreq: "weekly",
+    priority: "0.4"
+  })) : [];
+
+  const files: SitemapFileResult[] = [];
+  files.push(writeSitemapFile("sitemap-pages.xml", buildUrlset(pages), pages.length));
+  files.push(writeSitemapFile("sitemap-articles.xml", buildUrlset(articleEntries), articleEntries.length));
+  files.push(writeSitemapFile("sitemap-categories.xml", buildUrlset(categoryEntries), categoryEntries.length));
+  files.push(writeSitemapFile("sitemap-tags.xml", buildUrlset(tagEntries), tagEntries.length));
+  files.push(writeSitemapFile("sitemap-authors.xml", buildUrlset(authorEntries), authorEntries.length));
+  files.push(writeSitemapFile("sitemap-news.xml", buildNewsSitemap(includeArticles ? articles : []), includeArticles ? Math.min(articles.length, 1000) : 0));
+
+  const indexFile = writeSitemapFile("sitemap.xml", buildSitemapIndex(files), files.reduce((sum, file) => sum + file.count, 0));
+  const allFiles = [indexFile, ...files];
+  const totalUrls = files.reduce((sum, file) => sum + file.count, 0);
+
+  db.sitemapStatus = {
+    generatedAt: new Date().toISOString(),
+    totalUrls,
+    options: { includeArticles, includeCategories, includeTags, includeAuthors },
+    files: allFiles.map(file => ({ name: file.name, url: file.url, count: file.count, updatedAt: file.updatedAt })),
+    counts: {
+      pages: pages.length,
+      articles: articleEntries.length,
+      categories: categoryEntries.length,
+      tags: tagEntries.length,
+      authors: authorEntries.length,
+      news: includeArticles ? Math.min(articles.length, 1000) : 0
+    }
+  };
+
+  return db.sitemapStatus;
+}
+
+function ensureSitemapFiles() {
+  const sitemapPath = path.join(PUBLIC_STORAGE_PATH, "sitemap.xml");
+  if (!fs.existsSync(sitemapPath)) {
+    generateSitemaps({ includeArticles: true, includeCategories: true, includeTags: true, includeAuthors: true });
+    saveDb();
+  }
+}
+
+function sendSitemapFile(res: express.Response, filename: string) {
+  ensureSitemapFiles();
+  const targetPath = path.join(PUBLIC_STORAGE_PATH, filename);
+  if (!fs.existsSync(targetPath)) {
+    res.status(404).type("text/plain").send("Sitemap file not found");
+    return;
+  }
+  res.type("application/xml").send(fs.readFileSync(targetPath, "utf8"));
 }
 
 // Load DB immediately
@@ -1492,6 +1710,39 @@ Berikan output JSON dengan struktur eksak berikut tanpa teks tambahan/wrapper ma
       details: error.message
     });
   }
+});
+
+// Sitemap Public Files
+app.get("/sitemap.xml", (req, res) => sendSitemapFile(res, "sitemap.xml"));
+app.get("/sitemap-pages.xml", (req, res) => sendSitemapFile(res, "sitemap-pages.xml"));
+app.get("/sitemap-articles.xml", (req, res) => sendSitemapFile(res, "sitemap-articles.xml"));
+app.get("/sitemap-categories.xml", (req, res) => sendSitemapFile(res, "sitemap-categories.xml"));
+app.get("/sitemap-tags.xml", (req, res) => sendSitemapFile(res, "sitemap-tags.xml"));
+app.get("/sitemap-authors.xml", (req, res) => sendSitemapFile(res, "sitemap-authors.xml"));
+app.get("/sitemap-news.xml", (req, res) => sendSitemapFile(res, "sitemap-news.xml"));
+
+// API: Sitemap Status
+app.get("/api/sitemap/status", (req, res) => {
+  ensureSitemapFiles();
+  res.json(db.sitemapStatus || {});
+});
+
+// API: Regenerate Sitemap
+app.post("/api/sitemap/regenerate", (req, res) => {
+  const options = req.body || {};
+  const status = generateSitemaps(options);
+  
+  // Add Log Action
+  if (!db.logs) db.logs = [];
+  db.logs.unshift({
+    timestamp: new Date().toISOString(),
+    user: "Super Admin",
+    role: "Super Admin",
+    action: `Regenerated sitemap XML with total ${status.totalUrls} URLs`
+  });
+
+  saveDb();
+  res.json({ success: true, status });
 });
 
 // Backup & Restore

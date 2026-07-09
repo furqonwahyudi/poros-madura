@@ -172,7 +172,7 @@ export default function PortalFooter({ lang }: PortalFooterProps) {
                 <Rss size={12} />
                 <span>RSS</span>
               </a>
-              <a href="#" className="hover:text-white transition-colors">Sitemap XML</a>
+              <a href="/sitemap.xml" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Sitemap XML</a>
               <a href="#" className="hover:text-white transition-colors">Pedoman Redaksi</a>
               <a href="#" className="hover:text-white transition-colors">Siber Rule</a>
             </div>

@@ -15253,6 +15253,18 @@
   ],
   "logs": [
     {
+      "timestamp": "2026-07-09T06:03:34.533Z",
+      "user": "Super Admin",
+      "role": "Super Admin",
+      "action": "Regenerated sitemap XML with total 908 URLs"
+    },
+    {
+      "timestamp": "2026-07-09T06:01:23.891Z",
+      "user": "Super Admin",
+      "role": "Super Admin",
+      "action": "Regenerated sitemap XML with total 828 URLs"
+    },
+    {
       "timestamp": "2026-07-08T15:11:31.223Z",
       "user": "Super Admin",
       "role": "Super Admin",
@@ -15373,39 +15385,101 @@
       "count": 1450
     }
   ],
+  "sitemapStatus": {
+    "generatedAt": "2026-07-09T06:03:34.533Z",
+    "totalUrls": 908,
+    "options": {
+      "includeArticles": true,
+      "includeCategories": true,
+      "includeTags": true,
+      "includeAuthors": true
+    },
+    "files": [
+      {
+        "name": "sitemap.xml",
+        "url": "https://porosmadura.com/sitemap.xml",
+        "count": 908,
+        "updatedAt": "2026-07-09T06:03:34.533Z"
+      },
+      {
+        "name": "sitemap-pages.xml",
+        "url": "https://porosmadura.com/sitemap-pages.xml",
+        "count": 2,
+        "updatedAt": "2026-07-09T06:03:34.525Z"
+      },
+      {
+        "name": "sitemap-articles.xml",
+        "url": "https://porosmadura.com/sitemap-articles.xml",
+        "count": 403,
+        "updatedAt": "2026-07-09T06:03:34.527Z"
+      },
+      {
+        "name": "sitemap-categories.xml",
+        "url": "https://porosmadura.com/sitemap-categories.xml",
+        "count": 20,
+        "updatedAt": "2026-07-09T06:03:34.528Z"
+      },
+      {
+        "name": "sitemap-tags.xml",
+        "url": "https://porosmadura.com/sitemap-tags.xml",
+        "count": 68,
+        "updatedAt": "2026-07-09T06:03:34.529Z"
+      },
+      {
+        "name": "sitemap-authors.xml",
+        "url": "https://porosmadura.com/sitemap-authors.xml",
+        "count": 12,
+        "updatedAt": "2026-07-09T06:03:34.529Z"
+      },
+      {
+        "name": "sitemap-news.xml",
+        "url": "https://porosmadura.com/sitemap-news.xml",
+        "count": 403,
+        "updatedAt": "2026-07-09T06:03:34.532Z"
+      }
+    ],
+    "counts": {
+      "pages": 2,
+      "articles": 403,
+      "categories": 20,
+      "tags": 68,
+      "authors": 12,
+      "news": 403
+    }
+  },
   "marketCache": {
     "market_rate_gold": {
       "value": {
-        "price": 2653895,
-        "buybackPrice": 2361616,
-        "change": -2.72,
-        "status": "down",
-        "updated_at": "2026-07-08T15:48:35.635Z"
+        "price": 2701804,
+        "buybackPrice": 2404248,
+        "change": 0.76,
+        "status": "up",
+        "updated_at": "2026-07-09T06:08:43.949Z"
       },
-      "expireAt": 1783525775635
+      "expireAt": 1783577383949
     },
     "market_rate_usd": {
       "value": {
-        "price": 18000,
-        "change": 0.09,
+        "price": 18089,
+        "change": 0.49,
         "status": "up",
-        "updated_at": "2026-07-08T15:48:35.679Z"
+        "updated_at": "2026-07-09T06:08:43.967Z"
       },
-      "expireAt": 1783525775679
+      "expireAt": 1783577383967
     },
     "market_rate_ihsg": {
       "value": {
-        "price": 5873.372,
-        "change": -1.89,
-        "status": "down",
-        "updated_at": "2026-07-08T15:49:07.059Z"
+        "price": 5885.697,
+        "change": 0.21,
+        "status": "up",
+        "updated_at": "2026-07-09T06:09:10.120Z"
       },
-      "expireAt": 1783525777059
+      "expireAt": 1783577380120
     }
   },
   "marketLastUpdate": {
-    "ihsg": "2026-07-08T15:49:07.059Z",
-    "usd": "2026-07-08T15:48:35.679Z",
-    "gold": "2026-07-08T15:48:35.635Z"
+    "ihsg": "2026-07-09T06:09:10.120Z",
+    "usd": "2026-07-09T06:08:43.967Z",
+    "gold": "2026-07-09T06:08:43.949Z"
   }
 }

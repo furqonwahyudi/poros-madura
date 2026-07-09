@@ -107,6 +107,8 @@ export default function AdminCMS({ onBackToPortal, lang }: AdminCMSProps) {
   const [sitemapCategories, setSitemapCategories] = useState(true);
   const [sitemapTags, setSitemapTags] = useState(false);
   const [sitemapAuthors, setSitemapAuthors] = useState(false);
+  const [sitemapStatus, setSitemapStatus] = useState<any>(null);
+  const [sitemapLoading, setSitemapLoading] = useState(false);
 
   // Rich text editor ref
   const editorRef = useRef<HTMLDivElement>(null);
@@ -435,6 +437,39 @@ export default function AdminCMS({ onBackToPortal, lang }: AdminCMSProps) {
     }
   };
 
+  const handleRegenerateSitemap = async () => {
+    setSitemapLoading(true);
+    try {
+      const res = await fetch("/api/sitemap/regenerate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          includeArticles: sitemapArticles,
+          includeCategories: sitemapCategories,
+          includeTags: sitemapTags,
+          includeAuthors: sitemapAuthors
+        })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success) {
+          setSitemapStatus(data.status);
+          showAlert("Sitemap XML berhasil diperbarui secara instan!", "Sukses", "success");
+          const resLogs = await fetch("/api/logs");
+          if (resLogs.ok) setLogs(await resLogs.json());
+        } else {
+          showAlert("Gagal memperbarui sitemap: " + (data.error || "Unknown error"), "Error", "error");
+        }
+      } else {
+        showAlert("Gagal menghubungi server untuk memperbarui sitemap", "Error", "error");
+      }
+    } catch (err: any) {
+      showAlert("Terjadi kesalahan: " + err.message, "Error", "error");
+    } finally {
+      setSitemapLoading(false);
+    }
+  };
+
   useEffect(() => {
     loadAllData();
   }, []);
@@ -442,14 +477,15 @@ export default function AdminCMS({ onBackToPortal, lang }: AdminCMSProps) {
   const loadAllData = async () => {
     try {
       loadMarketSettings();
-      const [resArticles, resAds, resCategories, resLogs, resAnalytics, resSettings, resSubscribers] = await Promise.all([
+      const [resArticles, resAds, resCategories, resLogs, resAnalytics, resSettings, resSubscribers, resSitemap] = await Promise.all([
         fetch("/api/articles?status=all"),
         fetch("/api/ads"),
         fetch("/api/categories"),
         fetch("/api/logs"),
         fetch("/api/analytics/summary"),
         fetch("/api/settings"),
-        fetch("/api/newsletter/subscribers")
+        fetch("/api/newsletter/subscribers"),
+        fetch("/api/sitemap/status")
       ]);
 
       if (resArticles.ok) setArticles(await resArticles.json());
@@ -459,6 +495,16 @@ export default function AdminCMS({ onBackToPortal, lang }: AdminCMSProps) {
       if (resAnalytics.ok) setAnalytics(await resAnalytics.json());
       if (resSettings.ok) setSettings(await resSettings.json());
       if (resSubscribers.ok) setSubscribers(await resSubscribers.json());
+      if (resSitemap.ok) {
+        const sStatus = await resSitemap.json();
+        setSitemapStatus(sStatus);
+        if (sStatus.options) {
+          setSitemapArticles(sStatus.options.includeArticles !== false);
+          setSitemapCategories(sStatus.options.includeCategories !== false);
+          setSitemapTags(sStatus.options.includeTags === true);
+          setSitemapAuthors(sStatus.options.includeAuthors === true);
+        }
+      }
 
       // Fetch all comments for list
       const allComments: Comment[] = [];
@@ -1570,27 +1616,27 @@ export default function AdminCMS({ onBackToPortal, lang }: AdminCMSProps) {
 
           <button 
             onClick={() => setActiveMenu("newsletter")}
-            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-bold transition-all text-left cursor-pointer ${activeMenu === "newsletter" ? "bg-[#D71920] text-white" : "text-slate-400 hover:bg-slate-800 hover:text-white"}`}
+            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-bold transition-all text-left cursor-pointer ${activeMenu === "newsletter" ? "bg-[#D71920] text-white" : "text-slate-300 hover:bg-slate-800 hover:text-white"}`}
           >
             <Mail size={16} />
-            <span>Newsletter</span>
+            <span>NEWSLETTER</span>
           </button>
 
 
           <button 
             onClick={() => setActiveMenu("market")}
-            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-bold transition-all text-left cursor-pointer ${activeMenu === "market" ? "bg-[#D71920] text-white" : "text-slate-400 hover:bg-slate-800 hover:text-white"}`}
+            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-bold transition-all text-left cursor-pointer ${activeMenu === "market" ? "bg-[#D71920] text-white" : "text-slate-300 hover:bg-slate-800 hover:text-white"}`}
           >
             <Coins size={16} />
-            <span>Market Live Widget</span>
+            <span>MARKET LIVE WIDGET</span>
           </button>
 
           <button 
             onClick={() => setActiveMenu("advertisement")}
-            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-bold transition-all text-left cursor-pointer ${activeMenu === "advertisement" ? "bg-[#D71920] text-white" : "text-slate-400 hover:bg-slate-800 hover:text-white"}`}
+            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-bold transition-all text-left cursor-pointer ${activeMenu === "advertisement" ? "bg-[#D71920] text-white" : "text-slate-300 hover:bg-slate-800 hover:text-white"}`}
           >
             <Megaphone size={16} />
-            <span>Advertisement</span>
+            <span>ADVERTISEMENT</span>
           </button>
 
           {/* Accordion User Management */}
@@ -1643,7 +1689,7 @@ export default function AdminCMS({ onBackToPortal, lang }: AdminCMSProps) {
             >
               <span className="flex items-center gap-3">
                 <Globe size={16} />
-                <span>📈 SEO</span>
+                <span>SEO</span>
               </span>
               <svg
                 className={`w-3.5 h-3.5 text-slate-500 transition-transform duration-200 ${isSeoExpanded ? "rotate-90" : ""}`}
@@ -5231,76 +5277,24 @@ export default function AdminCMS({ onBackToPortal, lang }: AdminCMSProps) {
 
           {/* SCREEN: SEO - Sitemap */}
           {activeMenu === "seo-sitemap" && (() => {
-            const uniqueTags = Array.from(new Set(articles.flatMap(a => a.tags || []))).filter(Boolean) as string[];
-            const uniqueAuthors = Array.from(new Set(articles.map(a => a.author).filter(Boolean))) as string[];
-            const dynamicSitemapCount = 1 
-              + (sitemapArticles ? articles.length : 0)
-              + (sitemapCategories ? categories.length : 0)
-              + (sitemapTags ? uniqueTags.length : 0)
-              + (sitemapAuthors ? uniqueAuthors.length : 0);
-
             const renderDynamicSitemapText = () => {
+              if (sitemapLoading) return "Menghasilkan XML...";
+              if (!sitemapStatus || !sitemapStatus.files) {
+                return "Belum ada sitemap yang dibuat di server. Klik 'Buat Ulang Sitemap' untuk membuatnya.";
+              }
               let lines = [
                 `<?xml version="1.0" encoding="UTF-8"?>`,
-                `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`,
-                `  <url>`,
-                `    <loc>https://porosmadura.com/</loc>`,
-                `    <lastmod>${new Date().toISOString().split("T")[0]}</lastmod>`,
-                `    <changefreq>always</changefreq>`,
-                `    <priority>1.0</priority>`,
-                `  </url>`
+                `<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`
               ];
-
-              if (sitemapArticles) {
-                articles.forEach(a => {
-                  const lastMod = a.publishDate ? a.publishDate.split("T")[0] : new Date().toISOString().split("T")[0];
-                  lines.push(
-                    `  <url>`,
-                    `    <loc>https://porosmadura.com/${a.category.toLowerCase()}/${a.slug}</loc>`,
-                    `    <lastmod>${lastMod}</lastmod>`,
-                    `    <priority>0.8</priority>`,
-                    `  </url>`
-                  );
-                });
-              }
-
-              if (sitemapCategories) {
-                categories.forEach(c => {
-                  lines.push(
-                    `  <url>`,
-                    `    <loc>https://porosmadura.com/category/${c.toLowerCase()}</loc>`,
-                    `    <changefreq>weekly</changefreq>`,
-                    `    <priority>0.6</priority>`,
-                    `  </url>`
-                  );
-                });
-              }
-
-              if (sitemapTags) {
-                uniqueTags.forEach(t => {
-                  lines.push(
-                    `  <url>`,
-                    `    <loc>https://porosmadura.com/tag/${t.toLowerCase()}</loc>`,
-                    `    <changefreq>weekly</changefreq>`,
-                    `    <priority>0.4</priority>`,
-                    `  </url>`
-                  );
-                });
-              }
-
-              if (sitemapAuthors) {
-                uniqueAuthors.forEach(auth => {
-                  lines.push(
-                    `  <url>`,
-                    `    <loc>https://porosmadura.com/author/${auth.replace(/\s+/g, "-").toLowerCase()}</loc>`,
-                    `    <changefreq>weekly</changefreq>`,
-                    `    <priority>0.4</priority>`,
-                    `  </url>`
-                  );
-                });
-              }
-
-              lines.push(`</urlset>`);
+              sitemapStatus.files.filter((f: any) => f.name !== "sitemap.xml").forEach((file: any) => {
+                lines.push(
+                  `  <sitemap>`,
+                  `    <loc>${file.url}</loc>`,
+                  `    <lastmod>${file.updatedAt.split("T")[0]}</lastmod>`,
+                  `  </sitemap>`
+                );
+              });
+              lines.push(`</sitemapindex>`);
               return lines.join("\n");
             };
 
@@ -5312,78 +5306,112 @@ export default function AdminCMS({ onBackToPortal, lang }: AdminCMSProps) {
                 </div>
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                   <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 lg:col-span-2 flex flex-col gap-5">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block border-b border-slate-800 pb-2 font-sans">Sitemap XML Generasi Otomatis</span>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block border-b border-slate-800 pb-2 font-sans">Sitemap XML Generasi Otomatis (sitemap.xml)</span>
                     
-                    <div className="bg-slate-950 p-4 rounded-lg font-mono text-[11px] text-[#D71920] overflow-x-auto border border-slate-800 max-h-64 overflow-y-auto">
+                    <div className="bg-slate-950 p-4 rounded-lg font-mono text-[11px] text-[#D71920] overflow-x-auto border border-slate-800 max-h-64 overflow-y-auto whitespace-pre">
                       {renderDynamicSitemapText()}
                     </div>
 
                     <div className="flex gap-3 mt-2">
-                      <button onClick={() => showAlert("Sitemap XML berhasil diperbarui secara instan!", "Sukses", "success")} className="bg-[#D71920] hover:bg-[#D71920]/90 text-white font-bold text-xs py-2 px-4 rounded-lg cursor-pointer">
-                        Buat Ulang Sitemap
+                      <button 
+                        onClick={handleRegenerateSitemap} 
+                        disabled={sitemapLoading}
+                        className="bg-[#D71920] hover:bg-[#D71920]/90 text-white font-bold text-xs py-2 px-4 rounded-lg cursor-pointer disabled:opacity-50 flex items-center gap-2"
+                      >
+                        {sitemapLoading ? (
+                          <>
+                            <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                            Memproses...
+                          </>
+                        ) : (
+                          "Buat Ulang Sitemap"
+                        )}
                       </button>
-                      <a href="/sitemap.xml" target="_blank" className="bg-slate-800 hover:bg-slate-750 text-white text-xs font-bold py-2 px-4 rounded-lg cursor-pointer text-center">
-                        Lihat XML
+                      <a href="/sitemap.xml" target="_blank" className="bg-slate-800 hover:bg-slate-750 text-white text-xs font-bold py-2 px-4 rounded-lg cursor-pointer text-center flex items-center justify-center">
+                        Lihat XML Utama
                       </a>
                     </div>
                   </div>
 
                   <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 flex flex-col gap-4">
                     <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block border-b border-slate-800 pb-2">Status & Kriteria Sitemap</span>
+                    
                     <div className="flex flex-col gap-2 font-semibold text-xs border-b border-slate-800 pb-4 mb-2">
                       <div className="flex justify-between items-center py-1">
-                        <span className="text-slate-400">File URL</span>
+                        <span className="text-slate-400">File URL Utama</span>
                         <a href="/sitemap.xml" target="_blank" className="text-sky-400 hover:underline font-mono">/sitemap.xml</a>
                       </div>
                       <div className="flex justify-between items-center py-1">
                         <span className="text-slate-400">Total Tautan</span>
-                        <span className="text-white font-mono">{dynamicSitemapCount} URL</span>
+                        <span className="text-white font-mono">{sitemapStatus?.totalUrls || 0} URL</span>
                       </div>
+                      {sitemapStatus?.generatedAt && (
+                        <div className="flex justify-between items-center py-1">
+                          <span className="text-slate-400">Dibuat Pada</span>
+                          <span className="text-slate-300 font-mono text-[10px]">{new Date(sitemapStatus.generatedAt).toLocaleString("id-ID")}</span>
+                        </div>
+                      )}
                     </div>
                     
-                    <div className="flex items-center gap-3">
-                      <input 
-                        type="checkbox" 
-                        id="sm-articles" 
-                        checked={sitemapArticles} 
-                        onChange={(e) => setSitemapArticles(e.target.checked)} 
-                        className="rounded accent-[#D71920]" 
-                      />
-                      <label htmlFor="sm-articles" className="text-xs text-slate-300 font-bold cursor-pointer">Sertakan Halaman Artikel</label>
+                    <div className="flex flex-col gap-3 border-b border-slate-800 pb-4 mb-2">
+                      <div className="flex items-center gap-3">
+                        <input 
+                          type="checkbox" 
+                          id="sm-articles" 
+                          checked={sitemapArticles} 
+                          onChange={(e) => setSitemapArticles(e.target.checked)} 
+                          className="rounded accent-[#D71920]" 
+                        />
+                        <label htmlFor="sm-articles" className="text-xs text-slate-300 font-bold cursor-pointer">Sertakan Halaman Artikel</label>
+                      </div>
+
+                      <div className="flex items-center gap-3">
+                        <input 
+                          type="checkbox" 
+                          id="sm-cats" 
+                          checked={sitemapCategories} 
+                          onChange={(e) => setSitemapCategories(e.target.checked)} 
+                          className="rounded accent-[#D71920]" 
+                        />
+                        <label htmlFor="sm-cats" className="text-xs text-slate-300 font-bold cursor-pointer">Sertakan Halaman Kategori</label>
+                      </div>
+
+                      <div className="flex items-center gap-3">
+                        <input 
+                          type="checkbox" 
+                          id="sm-tags" 
+                          checked={sitemapTags} 
+                          onChange={(e) => setSitemapTags(e.target.checked)} 
+                          className="rounded accent-[#D71920]" 
+                        />
+                        <label htmlFor="sm-tags" className="text-xs text-slate-300 font-bold cursor-pointer">Sertakan Halaman Tag</label>
+                      </div>
+
+                      <div className="flex items-center gap-3">
+                        <input 
+                          type="checkbox" 
+                          id="sm-authors" 
+                          checked={sitemapAuthors} 
+                          onChange={(e) => setSitemapAuthors(e.target.checked)} 
+                          className="rounded accent-[#D71920]" 
+                        />
+                        <label htmlFor="sm-authors" className="text-xs text-slate-300 font-bold cursor-pointer">Sertakan Halaman Penulis</label>
+                      </div>
                     </div>
 
-                    <div className="flex items-center gap-3">
-                      <input 
-                        type="checkbox" 
-                        id="sm-cats" 
-                        checked={sitemapCategories} 
-                        onChange={(e) => setSitemapCategories(e.target.checked)} 
-                        className="rounded accent-[#D71920]" 
-                      />
-                      <label htmlFor="sm-cats" className="text-xs text-slate-300 font-bold cursor-pointer">Sertakan Halaman Kategori</label>
-                    </div>
-
-                    <div className="flex items-center gap-3">
-                      <input 
-                        type="checkbox" 
-                        id="sm-tags" 
-                        checked={sitemapTags} 
-                        onChange={(e) => setSitemapTags(e.target.checked)} 
-                        className="rounded accent-[#D71920]" 
-                      />
-                      <label htmlFor="sm-tags" className="text-xs text-slate-300 font-bold cursor-pointer">Sertakan Halaman Tag</label>
-                    </div>
-
-                    <div className="flex items-center gap-3">
-                      <input 
-                        type="checkbox" 
-                        id="sm-authors" 
-                        checked={sitemapAuthors} 
-                        onChange={(e) => setSitemapAuthors(e.target.checked)} 
-                        className="rounded accent-[#D71920]" 
-                      />
-                      <label htmlFor="sm-authors" className="text-xs text-slate-300 font-bold cursor-pointer">Sertakan Halaman Penulis</label>
-                    </div>
+                    {sitemapStatus?.files && sitemapStatus.files.length > 0 && (
+                      <div className="flex flex-col gap-2 mt-1">
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block border-b border-slate-800 pb-1 mb-1 font-sans">Berkas Sitemap Individu</span>
+                        <div className="flex flex-col gap-1 max-h-48 overflow-y-auto pr-1">
+                          {sitemapStatus.files.map((file: any) => (
+                            <div key={file.name} className="flex justify-between items-center text-xs py-1 hover:bg-slate-800 px-2 rounded transition-colors border border-transparent hover:border-slate-700">
+                              <a href={`/${file.name}`} target="_blank" className="text-sky-400 hover:underline font-mono text-[10px]">{file.name}</a>
+                              <span className="text-slate-300 font-mono text-[10px] bg-slate-950 px-1.5 py-0.5 rounded">{file.count} URL</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
