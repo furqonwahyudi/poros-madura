@@ -13,7 +13,8 @@ interface PortalHomeProps {
   onSelectArticle: (article: Article) => void;
   lang: "ID" | "EN";
   selectedCategory: string | null;
-  onCategorySelect?: (category: string | null) => void;
+  selectedSubCategory?: string | null;
+  onCategorySelect?: (category: string | null, subCategory?: string | null) => void;
   searchQuery?: string;
   onSearchClear?: () => void;
 }
@@ -150,6 +151,7 @@ export default function PortalHome({
   onSelectArticle, 
   lang, 
   selectedCategory, 
+  selectedSubCategory,
   onCategorySelect,
   searchQuery = "",
   onSearchClear
@@ -239,6 +241,11 @@ export default function PortalHome({
     };
   }, []);
 
+  const isCategory = (a: Article, catName: string) => {
+    const cLower = catName.toLowerCase();
+    return a.category?.toLowerCase() === cLower || a.subCategory?.toLowerCase() === cLower;
+  };
+
   useEffect(() => {
     async function loadArticles() {
       try {
@@ -247,8 +254,9 @@ export default function PortalHome({
         }
         // Fetch published articles
         let url = "/api/articles";
-        if (selectedCategory && selectedCategory !== "rekomendasi") {
-          url = `/api/articles?category=${encodeURIComponent(selectedCategory)}`;
+        const activeCat = selectedSubCategory || selectedCategory;
+        if (activeCat && activeCat !== "rekomendasi") {
+          url = `/api/articles?category=${encodeURIComponent(activeCat)}`;
         } else if (searchQuery) {
           url = `/api/articles?search=${encodeURIComponent(searchQuery)}`;
         }
@@ -269,12 +277,12 @@ export default function PortalHome({
       }
     }
     loadArticles();
-  }, [selectedCategory, searchQuery]);
+  }, [selectedCategory, selectedSubCategory, searchQuery]);
 
   useEffect(() => {
     setRecentPage(1);
     setCategoryPage(1);
-  }, [selectedCategory, selectedTag]);
+  }, [selectedCategory, selectedSubCategory, selectedTag]);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -324,7 +332,7 @@ export default function PortalHome({
   }, [headlineArticles.length]);
 
   const kesehatanArticles = [...articles]
-    .filter(a => a.category === "Kesehatan")
+    .filter(a => isCategory(a, "Kesehatan"))
     .sort((a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime())
     .slice(0, 15);
   const kesehatanChunks = (() => {
@@ -1240,11 +1248,11 @@ export default function PortalHome({
   // Grouping by standard layout categories
 
   const getCategoryArticles = (cat: string) => {
-    const list = filteredArticles.filter(a => a.category === cat);
+    const list = filteredArticles.filter(a => isCategory(a, cat));
     if (list.length >= 3) return list.slice(0, 3);
-    const extra = filteredArticles.filter(a => a.category !== cat).slice(0, 3 - list.length);
+    const extra = filteredArticles.filter(a => !isCategory(a, cat)).slice(0, 3 - list.length);
     return [...list, ...extra].map((a, idx) => {
-      if (a.category !== cat) {
+      if (!isCategory(a, cat)) {
         let image = a.image;
         if (cat === "Otomotif") {
           const autoImages = [
@@ -1253,7 +1261,7 @@ export default function PortalHome({
             "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=400&q=80"
           ];
           image = autoImages[idx % autoImages.length];
-        } else if (cat === "Hiburan") {
+        } else if (cat === "Hiburan" || cat === "Lainnya") {
           const entertainmentImages = [
             "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=400&q=80",
             "https://images.unsplash.com/photo-1460881680858-30d872d5b530?auto=format&fit=crop&w=400&q=80",
@@ -1267,14 +1275,14 @@ export default function PortalHome({
     });
   };
 
-  const politicsArticles = filteredArticles.filter(a => a.category === "Politik").slice(0, 3);
-  const nationalArticles = filteredArticles.filter(a => a.category === "Nasional").slice(0, 3);
+  const politicsArticles = filteredArticles.filter(a => isCategory(a, "Politik")).slice(0, 3);
+  const nationalArticles = filteredArticles.filter(a => isCategory(a, "Nasional")).slice(0, 3);
   const techArticles = getCategoryArticles("Teknologi");
   const otomotifArticles = getCategoryArticles("Otomotif");
   const hiburanArticles = getCategoryArticles("Hiburan");
-  const economyArticles = filteredArticles.filter(a => a.category === "Ekonomi").slice(0, 3);
-  const sportArticles = filteredArticles.filter(a => a.category === "Olahraga").slice(0, 3);
-  const opinionArticles = filteredArticles.filter(a => a.category === "Opini" || a.category === "Kolom" || a.category === "Editorial").slice(0, 4);
+  const economyArticles = filteredArticles.filter(a => isCategory(a, "Ekonomi")).slice(0, 3);
+  const sportArticles = filteredArticles.filter(a => isCategory(a, "Olahraga")).slice(0, 3);
+  const opinionArticles = filteredArticles.filter(a => isCategory(a, "Opini") || isCategory(a, "Kolom") || isCategory(a, "Editorial")).slice(0, 4);
   
   // Videos section
   const videoArticles = filteredArticles.filter(a => a.videoUrl).slice(0, 3);
@@ -1619,7 +1627,7 @@ export default function PortalHome({
               )}
 
               {/* Special Politik Block after 4 articles */}
-              {currentPageArticles.length >= 4 && filteredArticles.filter(a => a.category === "Politik").length > 0 && (
+              {currentPageArticles.length >= 4 && filteredArticles.filter(a => isCategory(a, "Politik")).length > 0 && (
                 <div className="border border-gray-100 bg-slate-50/60 rounded-xl p-3 sm:p-4 my-3">
                   <div className="border-b border-gray-200 pb-1.5 mb-3 flex justify-between items-center">
                     <h4 className="text-[11px] sm:text-xs font-black uppercase tracking-wider text-[#0a3a8e] border-l-3 border-[#0a3a8e] pl-2 flex items-center gap-1.5">
@@ -1628,7 +1636,7 @@ export default function PortalHome({
                     {onCategorySelect && (
                       <button 
                         onClick={() => {
-                          onCategorySelect("Politik");
+                          onCategorySelect("Berita", "Politik");
                           window.scrollTo({ top: 0, behavior: "smooth" });
                         }}
                         className="text-[10px] sm:text-xs font-semibold text-gray-600 hover:text-[#0a3a8e] flex items-center gap-0.5 transition-colors group cursor-pointer"
@@ -1640,7 +1648,7 @@ export default function PortalHome({
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-x-4 gap-y-3">
                     {(() => {
-                      const list = filteredArticles.filter(a => a.category === "Politik");
+                      const list = filteredArticles.filter(a => isCategory(a, "Politik"));
                       const targetCount = 9;
                       const results = [...list];
                       while (results.length < targetCount && list.length > 0) {
@@ -2308,7 +2316,7 @@ export default function PortalHome({
             
             <div className="flex flex-col gap-4">
               {(() => {
-                const sportList = articles.filter(a => a.category === "Olahraga");
+                const sportList = articles.filter(a => isCategory(a, "Olahraga"));
                 if (sportList.length === 0) {
                   return (
                     <div className="text-center py-6 text-xs text-gray-400">
@@ -2494,14 +2502,14 @@ export default function PortalHome({
 
             {(() => {
               // Get articles for lifestyle. Fall back to Otomotif, Hiburan, Teknologi to ensure we have variety
-              const originalLifestyle = articles.filter(a => a.category === "Lifestyle");
+              const originalLifestyle = articles.filter(a => isCategory(a, "Lifestyle"));
               const fallbackCategories = ["Otomotif", "Hiburan", "Teknologi", "Ekonomi", "Kesehatan"];
               let list = [...originalLifestyle];
               
               if (list.length < 5) {
                 const addedIds = new Set(list.map(a => a.id));
                 for (const catName of fallbackCategories) {
-                  const extra = articles.filter(a => a.category === catName && !addedIds.has(a.id));
+                  const extra = articles.filter(a => isCategory(a, catName) && !addedIds.has(a.id));
                   for (const art of extra) {
                     if (list.length >= 5) break;
                     list.push(art);

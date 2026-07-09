@@ -14,6 +14,20 @@ import {
 import AdminAdsManager from "./AdminAdsManager";
 import { useDialog } from "../context/DialogContext";
 
+const categoryHierarchy: Record<string, string[]> = {
+  "Berita": ["Politik", "Pemerintahan", "Hukum", "Kriminal"],
+  "Daerah": ["Bangkalan", "Sampang", "Pamekasan", "Sumenep", "Madura Raya"],
+  "Nasional": [],
+  "Pendidikan": [],
+  "Ekonomi": [],
+  "Kesehatan": [],
+  "Olahraga": ["Sepak Bola", "Bola Voli", "Basket", "MotoGP"],
+  "Teknologi": ["Gadget", "AI", "Internet", "Startup"],
+  "Otomotif": ["Mobil", "Motor", "Tips"],
+  "Lifestyle": ["Wisata", "Kuliner", "Budaya", "Hiburan"],
+  "Opini": []
+};
+
 interface AdminCMSProps {
   onBackToPortal: () => void;
   lang: "ID" | "EN";
@@ -2545,10 +2559,13 @@ export default function AdminCMS({ onBackToPortal, lang }: AdminCMSProps) {
                       <label className="text-xs font-bold text-slate-400 uppercase block mb-2">Kategori Berita *</label>
                       <select
                         value={category}
-                        onChange={(e) => setCategory(e.target.value)}
+                        onChange={(e) => {
+                          setCategory(e.target.value);
+                          setSubCategory("");
+                        }}
                         className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-lg text-xs text-white focus:outline-none focus:ring-1 focus:ring-[#D71920]"
                       >
-                        {categories.map(c => (
+                        {categories.filter(c => !Object.values(categoryHierarchy).flat().includes(c)).map(c => (
                           <option key={c} value={c}>{c}</option>
                         ))}
                       </select>
@@ -2558,13 +2575,26 @@ export default function AdminCMS({ onBackToPortal, lang }: AdminCMSProps) {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <label className="text-xs font-bold text-slate-400 uppercase block mb-2">Sub-Kategori (Opsional)</label>
-                      <input 
-                        type="text" 
-                        placeholder="Contoh: Infrastruktur, Legislatif, dll"
-                        value={subCategory}
-                        onChange={(e) => setSubCategory(e.target.value)}
-                        className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-lg text-xs text-white focus:outline-none focus:ring-1 focus:ring-[#D71920]"
-                      />
+                      {categoryHierarchy[category] && categoryHierarchy[category].length > 0 ? (
+                        <select
+                          value={subCategory}
+                          onChange={(e) => setSubCategory(e.target.value)}
+                          className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-lg text-xs text-white focus:outline-none focus:ring-1 focus:ring-[#D71920]"
+                        >
+                          <option value="">Tidak ada sub-kategori</option>
+                          {categoryHierarchy[category].map(sub => (
+                            <option key={sub} value={sub}>{sub}</option>
+                          ))}
+                        </select>
+                      ) : (
+                        <input 
+                          type="text" 
+                          placeholder="Contoh: Infrastruktur, Legislatif, dll"
+                          value={subCategory}
+                          onChange={(e) => setSubCategory(e.target.value)}
+                          className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-lg text-xs text-white focus:outline-none focus:ring-1 focus:ring-[#D71920]"
+                        />
+                      )}
                     </div>
                     <div>
                       <label className="text-xs font-bold text-slate-400 uppercase block mb-2">Cover Image URL *</label>

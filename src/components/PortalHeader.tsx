@@ -7,8 +7,9 @@ import logoUrl from "@/Logo_Type_trans.png";
 import iconUrl from "@/ICON.png";
 
 interface PortalHeaderProps {
-  onCategorySelect: (category: string | null) => void;
+  onCategorySelect: (category: string | null, subCategory?: string | null) => void;
   selectedCategory: string | null;
+  selectedSubCategory?: string | null;
   onSearch: (query: string) => void;
   onSelectArticle: (article: Article) => void;
   lang: "ID" | "EN";
@@ -17,9 +18,18 @@ interface PortalHeaderProps {
   currentPage: string;
 }
 
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[^\w\s-]/g, "")
+    .replace(/[\s_]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
 export default function PortalHeader({
   onCategorySelect,
   selectedCategory,
+  selectedSubCategory,
   onSearch,
   onSelectArticle,
   lang,
@@ -34,6 +44,7 @@ export default function PortalHeader({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [openSubmenus, setOpenSubmenus] = useState<Record<string, boolean>>({});
+  const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [breakingNews, setBreakingNews] = useState<Article[]>([]);
   const searchRef = useRef<HTMLDivElement>(null);
   const [isSticky, setIsSticky] = useState(false);
@@ -54,77 +65,133 @@ export default function PortalHeader({
     };
   }, []);
 
+  const handleBlur = (e: React.FocusEvent) => {
+    if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+      setActiveDropdown(null);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent, menuKey: string) => {
+    if (e.key === "Escape") {
+      setActiveDropdown(null);
+      (document.activeElement as HTMLElement)?.blur();
+    }
+  };
+
   const menuItems = [
     { name: { ID: "BERANDA", EN: "HOME" }, category: null },
     {
       name: { ID: "BERITA", EN: "NEWS" },
+      category: "Berita",
       subItems: [
-        { name: "Politik", category: "Politik" },
-        { name: "Pemerintahan", category: "Pemerintahan" },
-        { name: "Hukum", category: "Hukum" },
-        { name: "Kriminal", category: "Kriminal" },
-        { name: "Pendidikan", category: "Pendidikan" },
-        { name: "Kesehatan", category: "Kesehatan" },
-        { name: "Ekonomi", category: "Ekonomi" },
-        { name: "Nasional", category: "Nasional" },
-        { name: "Internasional", category: "Internasional" },
+        { name: "Politik", category: "Berita", subCategory: "Politik" },
+        { name: "Pemerintahan", category: "Berita", subCategory: "Pemerintahan" },
+        { name: "Hukum", category: "Berita", subCategory: "Hukum" },
+        { name: "Kriminal", category: "Berita", subCategory: "Kriminal" },
       ]
     },
     {
       name: { ID: "DAERAH", EN: "REGIONS" },
+      category: "Daerah",
       subItems: [
-        { name: "Bangkalan", category: "Bangkalan" },
-        { name: "Sampang", category: "Sampang" },
-        { name: "Pamekasan", category: "Pamekasan" },
-        { name: "Sumenep", category: "Sumenep" },
-        { name: "Madura Raya", category: "Madura Raya" },
+        { name: "Bangkalan", category: "Daerah", subCategory: "Bangkalan" },
+        { name: "Sampang", category: "Daerah", subCategory: "Sampang" },
+        { name: "Pamekasan", category: "Daerah", subCategory: "Pamekasan" },
+        { name: "Sumenep", category: "Daerah", subCategory: "Sumenep" },
+        { name: "Madura Raya", category: "Daerah", subCategory: "Madura Raya" },
       ]
     },
-    { name: { ID: "OLAHRAGA", EN: "SPORTS" }, category: "Olahraga" },
-    { name: { ID: "TEKNOLOGI", EN: "TECHNOLOGY" }, category: "Teknologi" },
-    { name: { ID: "OTOMOTIF", EN: "AUTOMOTIVE" }, category: "Otomotif" },
+    { name: { ID: "NASIONAL", EN: "NATIONAL" }, category: "Nasional" },
+    { name: { ID: "PENDIDIKAN", EN: "EDUCATION" }, category: "Pendidikan" },
+    { name: { ID: "EKONOMI", EN: "ECONOMY" }, category: "Ekonomi" },
+    { name: { ID: "KESEHATAN", EN: "HEALTH" }, category: "Kesehatan" },
+    {
+      name: { ID: "OLAHRAGA", EN: "SPORTS" },
+      category: "Olahraga",
+      subItems: [
+        { name: "Sepak Bola", category: "Olahraga", subCategory: "Sepak Bola" },
+        { name: "Bola Voli", category: "Olahraga", subCategory: "Bola Voli" },
+        { name: "Basket", category: "Olahraga", subCategory: "Basket" },
+        { name: "MotoGP", category: "Olahraga", subCategory: "MotoGP" },
+      ]
+    },
+    {
+      name: { ID: "TEKNOLOGI", EN: "TECHNOLOGY" },
+      category: "Teknologi",
+      subItems: [
+        { name: "Gadget", category: "Teknologi", subCategory: "Gadget" },
+        { name: "AI", category: "Teknologi", subCategory: "AI" },
+        { name: "Internet", category: "Teknologi", subCategory: "Internet" },
+        { name: "Startup", category: "Teknologi", subCategory: "Startup" },
+      ]
+    },
+    {
+      name: { ID: "OTOMOTIF", EN: "AUTOMOTIVE" },
+      category: "Otomotif",
+      subItems: [
+        { name: "Mobil", category: "Otomotif", subCategory: "Mobil" },
+        { name: "Motor", category: "Otomotif", subCategory: "Motor" },
+        { name: "Tips", category: "Otomotif", subCategory: "Tips" },
+      ]
+    },
     {
       name: { ID: "LIFESTYLE", EN: "LIFESTYLE" },
+      category: "Lifestyle",
       subItems: [
-        { name: "Wisata", category: "Wisata" },
-        { name: "Kuliner", category: "Kuliner" },
-        { name: "Budaya", category: "Budaya" },
-        { name: "Hiburan", category: "Hiburan" },
+        { name: "Wisata", category: "Lifestyle", subCategory: "Wisata" },
+        { name: "Kuliner", category: "Lifestyle", subCategory: "Kuliner" },
+        { name: "Budaya", category: "Lifestyle", subCategory: "Budaya" },
+        { name: "Hiburan", category: "Lifestyle", subCategory: "Hiburan" },
       ]
     },
     { name: { ID: "OPINI", EN: "OPINION" }, category: "Opini" }
   ];
 
   const mobileFlatCategories = [
-    { name: { ID: "BERANDA", EN: "HOME" }, category: null },
-    { name: { ID: "Politik", EN: "Politics" }, category: "Politik" },
-    { name: { ID: "Pemerintahan", EN: "Government" }, category: "Pemerintahan" },
-    { name: { ID: "Hukum", EN: "Law" }, category: "Hukum" },
-    { name: { ID: "Kriminal", EN: "Crime" }, category: "Kriminal" },
-    { name: { ID: "Pendidikan", EN: "Education" }, category: "Pendidikan" },
-    { name: { ID: "Kesehatan", EN: "Health" }, category: "Kesehatan" },
-    { name: { ID: "Ekonomi", EN: "Economy" }, category: "Ekonomi" },
-    { name: { ID: "Nasional", EN: "National" }, category: "Nasional" },
-    { name: { ID: "Internasional", EN: "International" }, category: "Internasional" },
-    { name: { ID: "Bangkalan", EN: "Bangkalan" }, category: "Bangkalan" },
-    { name: { ID: "Sampang", EN: "Sampang" }, category: "Sampang" },
-    { name: { ID: "Pamekasan", EN: "Pamekasan" }, category: "Pamekasan" },
-    { name: { ID: "Sumenep", EN: "Sumenep" }, category: "Sumenep" },
-    { name: { ID: "Madura Raya", EN: "Great Madura" }, category: "Madura Raya" },
-    { name: { ID: "Olahraga", EN: "Sports" }, category: "Olahraga" },
-    { name: { ID: "Teknologi", EN: "Technology" }, category: "Teknologi" },
-    { name: { ID: "Otomotif", EN: "Automotive" }, category: "Otomotif" },
-    { name: { ID: "Wisata", EN: "Tourism" }, category: "Wisata" },
-    { name: { ID: "Kuliner", EN: "Culinary" }, category: "Kuliner" },
-    { name: { ID: "Budaya", EN: "Culture" }, category: "Budaya" },
-    { name: { ID: "Hiburan", EN: "Entertainment" }, category: "Hiburan" },
-    { name: { ID: "Opini", EN: "Opinion" }, category: "Opini" }
+    { name: { ID: "BERANDA", EN: "HOME" }, category: null, subCategory: null },
+    { name: { ID: "Berita", EN: "News" }, category: "Berita", subCategory: null },
+    { name: { ID: "Politik", EN: "Politics" }, category: "Berita", subCategory: "Politik" },
+    { name: { ID: "Pemerintahan", EN: "Government" }, category: "Berita", subCategory: "Pemerintahan" },
+    { name: { ID: "Hukum", EN: "Law" }, category: "Berita", subCategory: "Hukum" },
+    { name: { ID: "Kriminal", EN: "Crime" }, category: "Berita", subCategory: "Kriminal" },
+    { name: { ID: "Daerah", EN: "Regions" }, category: "Daerah", subCategory: null },
+    { name: { ID: "Bangkalan", EN: "Bangkalan" }, category: "Daerah", subCategory: "Bangkalan" },
+    { name: { ID: "Sampang", EN: "Sampang" }, category: "Daerah", subCategory: "Sampang" },
+    { name: { ID: "Pamekasan", EN: "Pamekasan" }, category: "Daerah", subCategory: "Pamekasan" },
+    { name: { ID: "Sumenep", EN: "Sumenep" }, category: "Daerah", subCategory: "Sumenep" },
+    { name: { ID: "Madura Raya", EN: "Great Madura" }, category: "Daerah", subCategory: "Madura Raya" },
+    { name: { ID: "Nasional", EN: "National" }, category: "Nasional", subCategory: null },
+    { name: { ID: "Pendidikan", EN: "Education" }, category: "Pendidikan", subCategory: null },
+    { name: { ID: "Ekonomi", EN: "Economy" }, category: "Ekonomi", subCategory: null },
+    { name: { ID: "Kesehatan", EN: "Health" }, category: "Kesehatan", subCategory: null },
+    { name: { ID: "Olahraga", EN: "Sports" }, category: "Olahraga", subCategory: null },
+    { name: { ID: "Sepak Bola", EN: "Football" }, category: "Olahraga", subCategory: "Sepak Bola" },
+    { name: { ID: "Bola Voli", EN: "Volleyball" }, category: "Olahraga", subCategory: "Bola Voli" },
+    { name: { ID: "Basket", EN: "Basketball" }, category: "Olahraga", subCategory: "Basket" },
+    { name: { ID: "MotoGP", EN: "MotoGP" }, category: "Olahraga", subCategory: "MotoGP" },
+    { name: { ID: "Teknologi", EN: "Technology" }, category: "Teknologi", subCategory: null },
+    { name: { ID: "Gadget", EN: "Gadget" }, category: "Teknologi", subCategory: "Gadget" },
+    { name: { ID: "AI", EN: "AI" }, category: "Teknologi", subCategory: "AI" },
+    { name: { ID: "Internet", EN: "Internet" }, category: "Teknologi", subCategory: "Internet" },
+    { name: { ID: "Startup", EN: "Startup" }, category: "Teknologi", subCategory: "Startup" },
+    { name: { ID: "Otomotif", EN: "Automotive" }, category: "Otomotif", subCategory: null },
+    { name: { ID: "Mobil", EN: "Car" }, category: "Otomotif", subCategory: "Mobil" },
+    { name: { ID: "Motor", EN: "Motorcycle" }, category: "Otomotif", subCategory: "Motor" },
+    { name: { ID: "Tips", EN: "Tips" }, category: "Otomotif", subCategory: "Tips" },
+    { name: { ID: "Lifestyle", EN: "Lifestyle" }, category: "Lifestyle", subCategory: null },
+    { name: { ID: "Wisata", EN: "Tourism" }, category: "Lifestyle", subCategory: "Wisata" },
+    { name: { ID: "Kuliner", EN: "Culinary" }, category: "Lifestyle", subCategory: "Kuliner" },
+    { name: { ID: "Budaya", EN: "Culture" }, category: "Lifestyle", subCategory: "Budaya" },
+    { name: { ID: "Hiburan", EN: "Entertainment" }, category: "Lifestyle", subCategory: "Hiburan" },
+    { name: { ID: "Opini", EN: "Opinion" }, category: "Opini", subCategory: null }
   ];
 
   const isItemActive = (item: any) => {
-    if (item.category === selectedCategory) return true;
+    if (item.category && item.category === selectedCategory) return true;
     if (item.subItems) {
-      return item.subItems.some((sub: any) => sub.category === selectedCategory);
+      return item.subItems.some((sub: any) => 
+        (sub.category === selectedCategory && sub.subCategory === selectedSubCategory)
+      );
     }
     return false;
   };
@@ -428,6 +495,9 @@ export default function PortalHeader({
                             ...prev,
                             [menuKey]: !isExpanded
                           }));
+                          if (item.category) {
+                            onCategorySelect(item.category);
+                          }
                         }}
                         className={`w-full flex items-center justify-between px-2.5 py-1.5 text-xs font-extrabold uppercase tracking-wide text-[#0D2B5C] hover:text-[#D71920] transition-colors cursor-pointer text-left`}
                       >
@@ -446,12 +516,12 @@ export default function PortalHeader({
                           className="pl-3.5 flex flex-col gap-1 mt-1.5 border-l-2 border-[#0D2B5C]/10 ml-2.5 overflow-hidden"
                         >
                           {item.subItems.map((sub, sIdx) => {
-                            const subActive = selectedCategory === sub.category;
+                            const subActive = selectedCategory === sub.category && selectedSubCategory === sub.subCategory;
                             return (
                               <button
                                 key={sIdx}
                                 onClick={() => {
-                                  onCategorySelect(sub.category);
+                                  onCategorySelect(sub.category, sub.subCategory);
                                   setMobileMenuOpen(false);
                                 }}
                                 className={`text-left px-2.5 py-1.5 text-xs font-semibold rounded-md transition-all duration-200 cursor-pointer ${
@@ -544,60 +614,107 @@ export default function PortalHeader({
                 )}
               </motion.div>
             )}
-            {menuItems.map((item, idx) => {
-              const active = isItemActive(item);
-              const displayName = lang === "ID" ? item.name.ID : item.name.EN;
-              
-              if (item.subItems) {
-                return (
-                  <div key={idx} className="relative group shrink-0">
-                    <button
-                      className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-200 cursor-pointer flex items-center gap-1 ${
-                        active
-                          ? "bg-[#0D2B5C] text-white shadow-sm"
-                          : "text-gray-600 hover:bg-gray-100 hover:text-[#0D2B5C]"
-                      }`}
-                    >
-                      <span>{displayName}</span>
-                      <ChevronDown size={12} className={`transition-transform group-hover:rotate-180 duration-200 shrink-0 ${active ? "text-white" : "text-gray-400 group-hover:text-[#0D2B5C]"}`} />
-                    </button>
-                    {/* Dropdown Menu */}
-                    <div className="absolute left-0 mt-1 w-48 bg-white border border-gray-100 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 py-1 divide-y divide-gray-50/50">
-                      {item.subItems.map((sub, sIdx) => {
-                        const subActive = selectedCategory === sub.category;
-                        return (
-                          <button
-                            key={sIdx}
-                            onClick={() => onCategorySelect(sub.category)}
-                            className={`w-full text-left px-4 py-2 text-xs font-semibold transition-colors cursor-pointer block ${
-                              subActive
-                                ? "bg-[#0D2B5C]/10 text-[#0D2B5C] font-bold"
-                                : "text-gray-600 hover:bg-gray-50 hover:text-[#0D2B5C]"
-                            }`}
-                          >
-                            {sub.name}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                );
-              }
+            <nav aria-label="Navigasi Utama">
+              <ul className="flex items-center gap-1 flex-wrap">
+                {menuItems.map((item, idx) => {
+                  const active = isItemActive(item);
+                  const displayName = lang === "ID" ? item.name.ID : item.name.EN;
+                  const menuKey = item.name.ID;
+                  const href = item.category ? `/${slugify(item.category)}` : "/";
+                  
+                  if (item.subItems) {
+                    const isDropdownOpen = activeDropdown === menuKey;
+                    return (
+                      <li 
+                        key={idx} 
+                        className="relative shrink-0"
+                        onMouseEnter={() => setActiveDropdown(menuKey)}
+                        onMouseLeave={() => setActiveDropdown(null)}
+                        onBlur={handleBlur}
+                      >
+                        <a
+                          href={href}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            onCategorySelect(item.category);
+                          }}
+                          onFocus={() => setActiveDropdown(menuKey)}
+                          onKeyDown={(e) => handleKeyDown(e, menuKey)}
+                          aria-expanded={isDropdownOpen ? "true" : "false"}
+                          aria-haspopup="true"
+                          aria-controls={`dropdown-${idx}`}
+                          className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-200 cursor-pointer flex items-center gap-1 ${
+                            active
+                              ? "bg-[#0D2B5C] text-white shadow-sm"
+                              : "text-gray-600 hover:bg-gray-100 hover:text-[#0D2B5C]"
+                          }`}
+                        >
+                          <span>{displayName}</span>
+                          <ChevronDown size={12} className={`transition-transform duration-200 shrink-0 ${isDropdownOpen ? "rotate-180" : ""} ${active ? "text-white" : "text-gray-400"}`} />
+                        </a>
+                        {/* Dropdown Menu */}
+                        <div 
+                          id={`dropdown-${idx}`}
+                          role="menu"
+                          className={`absolute left-0 top-full w-48 pt-1 z-50 transform transition-all duration-150 ease-out ${
+                            isDropdownOpen 
+                              ? "opacity-100 translate-y-0 visible pointer-events-auto" 
+                              : "opacity-0 -translate-y-[6px] invisible pointer-events-none"
+                          }`}
+                        >
+                          <div className="bg-white border border-gray-100 rounded-xl shadow-xl py-1 divide-y divide-gray-50/50">
+                          {item.subItems.map((sub, sIdx) => {
+                            const subActive = selectedCategory === sub.category && selectedSubCategory === sub.subCategory;
+                            const subHref = `/${slugify(sub.category)}/${slugify(sub.subCategory)}`;
+                            return (
+                              <a
+                                key={sIdx}
+                                role="menuitem"
+                                href={subHref}
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  onCategorySelect(sub.category, sub.subCategory);
+                                }}
+                                onFocus={() => setActiveDropdown(menuKey)}
+                                onKeyDown={(e) => handleKeyDown(e, menuKey)}
+                                className={`w-full text-left px-4 py-2 text-xs font-semibold transition-colors cursor-pointer block ${
+                                  subActive
+                                    ? "bg-[#0D2B5C]/10 text-[#0D2B5C] font-bold"
+                                    : "text-gray-600 hover:bg-gray-50 hover:text-[#0D2B5C]"
+                                }`}
+                              >
+                                {sub.name}
+                              </a>
+                            );
+                          })}
+                          </div>
+                        </div>
+                      </li>
+                    );
+                  }
 
-              return (
-                <button
-                  key={idx}
-                  onClick={() => onCategorySelect(item.category)}
-                  className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-200 shrink-0 cursor-pointer ${
-                    active
-                      ? "bg-[#0D2B5C] text-white shadow-sm"
-                      : "text-gray-600 hover:bg-gray-100 hover:text-[#0D2B5C]"
-                  }`}
-                >
-                  {displayName}
-                </button>
-              );
-            })}
+                  return (
+                    <li key={idx} className="shrink-0">
+                      <a
+                        href={href}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          onCategorySelect(item.category);
+                        }}
+                        onFocus={() => setActiveDropdown(null)}
+                        className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-200 shrink-0 cursor-pointer block ${
+                          active
+                            ? "bg-[#0D2B5C] text-white shadow-sm"
+                            : "text-gray-600 hover:bg-gray-100 hover:text-[#0D2B5C]"
+                        }`}
+                      >
+                        {displayName}
+                      </a>
+                    </li>
+                  );
+                })}
+              </ul>
+            </nav>
           </div>
         </div>
 
@@ -629,13 +746,13 @@ export default function PortalHeader({
             </motion.div>
           )}
           {mobileFlatCategories.map((item, idx) => {
-            const active = selectedCategory === item.category;
+            const active = selectedCategory === item.category && selectedSubCategory === item.subCategory;
             const displayName = lang === "ID" ? item.name.ID : item.name.EN;
             return (
               <button
                 key={idx}
                 id={`cat-mobile-${idx}`}
-                onClick={() => onCategorySelect(item.category)}
+                onClick={() => onCategorySelect(item.category, item.subCategory)}
                 className={`px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-200 shrink-0 cursor-pointer ${
                   active
                     ? "bg-[#0D2B5C] text-white shadow-sm"

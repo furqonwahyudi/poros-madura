@@ -707,20 +707,79 @@ function loadDb() {
       ensureAtLeast50Articles();
       saveDb();
     }
+    // Migrate categories list and article categories/subcategories to match new structure
+    let changed = false;
+    const DEFAULT_CATEGORIES = [
+      "Berita", "Politik", "Pemerintahan", "Hukum", "Kriminal",
+      "Daerah", "Bangkalan", "Sampang", "Pamekasan", "Sumenep", "Madura Raya",
+      "Nasional", "Pendidikan", "Ekonomi", "Kesehatan",
+      "Olahraga", "Sepak Bola", "Bola Voli", "Basket", "MotoGP",
+      "Teknologi", "Gadget", "AI", "Internet", "Startup",
+      "Otomotif", "Mobil", "Motor", "Tips",
+      "Lifestyle", "Wisata", "Kuliner", "Budaya", "Hiburan",
+      "Opini"
+    ];
 
-    // Migrate existing articles to have diverse images
+    if (!db.categories || JSON.stringify(db.categories) !== JSON.stringify(DEFAULT_CATEGORIES)) {
+      db.categories = DEFAULT_CATEGORIES;
+      changed = true;
+    }
+
+    const migrationMap: Record<string, { category: string; subCategory: string }> = {
+      "Politik": { category: "Berita", subCategory: "Politik" },
+      "Pemerintahan": { category: "Berita", subCategory: "Pemerintahan" },
+      "Hukum": { category: "Berita", subCategory: "Hukum" },
+      "Kriminal": { category: "Berita", subCategory: "Kriminal" },
+      "Internasional": { category: "Berita", subCategory: "Politik" },
+      "Bangkalan": { category: "Daerah", subCategory: "Bangkalan" },
+      "Sampang": { category: "Daerah", subCategory: "Sampang" },
+      "Pamekasan": { category: "Daerah", subCategory: "Pamekasan" },
+      "Sumenep": { category: "Daerah", subCategory: "Sumenep" },
+      "Madura Raya": { category: "Daerah", subCategory: "Madura Raya" },
+      "Sepak Bola": { category: "Olahraga", subCategory: "Sepak Bola" },
+      "Bola Voli": { category: "Olahraga", subCategory: "Bola Voli" },
+      "Basket": { category: "Olahraga", subCategory: "Basket" },
+      "MotoGP": { category: "Olahraga", subCategory: "MotoGP" },
+      "Gadget": { category: "Teknologi", subCategory: "Gadget" },
+      "AI": { category: "Teknologi", subCategory: "AI" },
+      "Internet": { category: "Teknologi", subCategory: "Internet" },
+      "Startup": { category: "Teknologi", subCategory: "Startup" },
+      "Mobil": { category: "Otomotif", subCategory: "Mobil" },
+      "Motor": { category: "Otomotif", subCategory: "Motor" },
+      "Tips": { category: "Otomotif", subCategory: "Tips" },
+      "Wisata": { category: "Lifestyle", subCategory: "Wisata" },
+      "Kuliner": { category: "Lifestyle", subCategory: "Kuliner" },
+      "Budaya": { category: "Lifestyle", subCategory: "Budaya" },
+      "Hiburan": { category: "Lifestyle", subCategory: "Hiburan" },
+      "Kolom": { category: "Opini", subCategory: "" },
+      "Editorial": { category: "Opini", subCategory: "" },
+      "Infografis": { category: "Lifestyle", subCategory: "Hiburan" },
+      "Video": { category: "Lifestyle", subCategory: "Hiburan" },
+      "Foto": { category: "Lifestyle", subCategory: "Hiburan" },
+      "Lainnya": { category: "Lifestyle", subCategory: "Hiburan" }
+    };
+
     if (db.articles && db.articles.length > 0) {
-      let changed = false;
       for (const art of db.articles) {
+        // Migrate category structure
+        if (migrationMap[art.category]) {
+          const map = migrationMap[art.category];
+          art.subCategory = map.subCategory;
+          art.category = map.category;
+          changed = true;
+        }
+        
+        // Ensure diverse images is updated
         const newImg = getDiverseImage(art.category, art.id, art.title, art.image);
         if (art.image !== newImg) {
           art.image = newImg;
           changed = true;
         }
       }
-      if (changed) {
-        saveDb();
-      }
+    }
+
+    if (changed) {
+      saveDb();
     }
   } catch (err) {
     console.error("Failed to load db.json, using seed:", err);
@@ -1006,6 +1065,16 @@ app.delete("/api/categories/:name", (req, res) => {
   db.categories = db.categories.filter(c => c !== name);
   saveDb();
   res.json({ success: true, categories: db.categories });
+});
+
+app.get("/api/articles/slug/:slug", (req, res) => {
+  const { slug } = req.params;
+  const article = db.articles.find(a => a.slug === slug);
+  if (article) {
+    res.json(article);
+  } else {
+    res.status(404).json({ error: "Article not found" });
+  }
 });
 
 // API: Articles (GET with filters)
