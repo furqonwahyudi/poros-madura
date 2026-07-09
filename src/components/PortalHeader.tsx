@@ -88,6 +88,9 @@ export default function PortalHeader({
         { name: "Pemerintahan", category: "Berita", subCategory: "Pemerintahan" },
         { name: "Hukum", category: "Berita", subCategory: "Hukum" },
         { name: "Kriminal", category: "Berita", subCategory: "Kriminal" },
+        { name: "Pendidikan", category: "Berita", subCategory: "Pendidikan" },
+        { name: "Ekonomi", category: "Berita", subCategory: "Ekonomi" },
+        { name: "Kesehatan", category: "Berita", subCategory: "Kesehatan" },
       ]
     },
     {
@@ -102,9 +105,6 @@ export default function PortalHeader({
       ]
     },
     { name: { ID: "NASIONAL", EN: "NATIONAL" }, category: "Nasional" },
-    { name: { ID: "PENDIDIKAN", EN: "EDUCATION" }, category: "Pendidikan" },
-    { name: { ID: "EKONOMI", EN: "ECONOMY" }, category: "Ekonomi" },
-    { name: { ID: "KESEHATAN", EN: "HEALTH" }, category: "Kesehatan" },
     {
       name: { ID: "OLAHRAGA", EN: "SPORTS" },
       category: "Olahraga",
@@ -154,6 +154,9 @@ export default function PortalHeader({
     { name: { ID: "Pemerintahan", EN: "Government" }, category: "Berita", subCategory: "Pemerintahan" },
     { name: { ID: "Hukum", EN: "Law" }, category: "Berita", subCategory: "Hukum" },
     { name: { ID: "Kriminal", EN: "Crime" }, category: "Berita", subCategory: "Kriminal" },
+    { name: { ID: "Pendidikan", EN: "Education" }, category: "Berita", subCategory: "Pendidikan" },
+    { name: { ID: "Ekonomi", EN: "Economy" }, category: "Berita", subCategory: "Ekonomi" },
+    { name: { ID: "Kesehatan", EN: "Health" }, category: "Berita", subCategory: "Kesehatan" },
     { name: { ID: "Daerah", EN: "Regions" }, category: "Daerah", subCategory: null },
     { name: { ID: "Bangkalan", EN: "Bangkalan" }, category: "Daerah", subCategory: "Bangkalan" },
     { name: { ID: "Sampang", EN: "Sampang" }, category: "Daerah", subCategory: "Sampang" },
@@ -161,9 +164,6 @@ export default function PortalHeader({
     { name: { ID: "Sumenep", EN: "Sumenep" }, category: "Daerah", subCategory: "Sumenep" },
     { name: { ID: "Madura Raya", EN: "Great Madura" }, category: "Daerah", subCategory: "Madura Raya" },
     { name: { ID: "Nasional", EN: "National" }, category: "Nasional", subCategory: null },
-    { name: { ID: "Pendidikan", EN: "Education" }, category: "Pendidikan", subCategory: null },
-    { name: { ID: "Ekonomi", EN: "Economy" }, category: "Ekonomi", subCategory: null },
-    { name: { ID: "Kesehatan", EN: "Health" }, category: "Kesehatan", subCategory: null },
     { name: { ID: "Olahraga", EN: "Sports" }, category: "Olahraga", subCategory: null },
     { name: { ID: "Sepak Bola", EN: "Football" }, category: "Olahraga", subCategory: "Sepak Bola" },
     { name: { ID: "Bola Voli", EN: "Volleyball" }, category: "Olahraga", subCategory: "Bola Voli" },

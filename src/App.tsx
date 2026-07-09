@@ -11,12 +11,9 @@ import AdManagerSlot from "./components/AdManagerSlot";
 import FloatingAdLayout from "./components/FloatingAdLayout";
 
 const categoryHierarchy: Record<string, string[]> = {
-  "Berita": ["Politik", "Pemerintahan", "Hukum", "Kriminal"],
+  "Berita": ["Politik", "Pemerintahan", "Hukum", "Kriminal", "Pendidikan", "Ekonomi", "Kesehatan"],
   "Daerah": ["Bangkalan", "Sampang", "Pamekasan", "Sumenep", "Madura Raya"],
   "Nasional": [],
-  "Pendidikan": [],
-  "Ekonomi": [],
-  "Kesehatan": [],
   "Olahraga": ["Sepak Bola", "Bola Voli", "Basket", "MotoGP"],
   "Teknologi": ["Gadget", "AI", "Internet", "Startup"],
   "Otomotif": ["Mobil", "Motor", "Tips"],
