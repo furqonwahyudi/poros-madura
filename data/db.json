@@ -15453,34 +15453,34 @@
         "price": 5912.442,
         "change": 0.67,
         "status": "up",
-        "updated_at": "2026-07-09T17:48:56.434Z"
+        "updated_at": "2026-07-09T18:01:56.718Z"
       },
-      "expireAt": 1783619366434
+      "expireAt": 1783620146718
     },
     "market_rate_usd": {
       "value": {
         "price": 18085,
         "change": 0.47,
         "status": "up",
-        "updated_at": "2026-07-09T17:48:56.455Z"
+        "updated_at": "2026-07-09T18:01:56.765Z"
       },
-      "expireAt": 1783619366455
+      "expireAt": 1783620146765
     },
     "market_rate_gold": {
       "value": {
-        "price": 2734732,
-        "buybackPrice": 2433550,
-        "change": 1.99,
+        "price": 2736843,
+        "buybackPrice": 2435429,
+        "change": 2.06,
         "status": "up",
-        "updated_at": "2026-07-09T17:48:56.478Z"
+        "updated_at": "2026-07-09T18:01:56.801Z"
       },
-      "expireAt": 1783619366478
+      "expireAt": 1783620146801
     }
   },
   "marketLastUpdate": {
-    "ihsg": "2026-07-09T17:48:56.434Z",
-    "usd": "2026-07-09T17:48:56.455Z",
-    "gold": "2026-07-09T17:48:56.478Z"
+    "ihsg": "2026-07-09T18:01:56.718Z",
+    "usd": "2026-07-09T18:01:56.765Z",
+    "gold": "2026-07-09T18:01:56.801Z"
   },
   "marketSettings": {
     "enabled": true,
