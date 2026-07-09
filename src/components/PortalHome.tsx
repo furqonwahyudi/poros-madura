@@ -247,7 +247,7 @@ export default function PortalHome({
         }
         // Fetch published articles
         let url = "/api/articles";
-        if (selectedCategory) {
+        if (selectedCategory && selectedCategory !== "rekomendasi") {
           url = `/api/articles?category=${encodeURIComponent(selectedCategory)}`;
         } else if (searchQuery) {
           url = `/api/articles?search=${encodeURIComponent(searchQuery)}`;
@@ -280,15 +280,22 @@ export default function PortalHome({
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [recentPage, categoryPage]);
 
-  // Filter by selected tag if set
-  const filteredArticles = selectedTag
-    ? articles.filter(a => 
+  // Filter by selected tag if set and handle special "rekomendasi" category
+  const filteredArticles = useMemo(() => {
+    let list = articles;
+    if (selectedCategory === "rekomendasi") {
+      list = list.filter(a => a.isEditorChoice === true);
+    }
+    if (selectedTag) {
+      list = list.filter(a => 
         (a.title && a.title.toLowerCase().includes(selectedTag.toLowerCase())) ||
         (a.content && a.content.toLowerCase().includes(selectedTag.toLowerCase())) ||
         (a.tags && a.tags.some(t => t.toLowerCase().includes(selectedTag.toLowerCase()))) ||
         (a.metaKeywords && a.metaKeywords.some(t => t.toLowerCase().includes(selectedTag.toLowerCase())))
-      )
-    : articles;
+      );
+    }
+    return list;
+  }, [articles, selectedCategory, selectedTag]);
 
   const ITEMS_PER_PAGE = 20;
   const totalPages = Math.ceil(filteredArticles.length / ITEMS_PER_PAGE);
@@ -396,6 +403,7 @@ export default function PortalHome({
         case "kesehatan": return <Activity className="text-rose-600 animate-pulse" size={24} />;
         case "hiburan": return <Video className="text-purple-600 animate-pulse" size={24} />;
         case "opini": case "editorial": case "kolom": return <Newspaper className="text-teal-600 animate-pulse" size={24} />;
+        case "rekomendasi": return <Sparkles className="text-amber-500 animate-pulse" size={24} />;
         default: return <BookOpen className="text-slate-600 animate-pulse" size={24} />;
       }
     };
@@ -410,6 +418,7 @@ export default function PortalHome({
         case "nasional": return { text: "text-red-700", bg: "bg-red-50/70", border: "border-red-100", accent: "bg-red-600", accentText: "text-red-600" };
         case "kesehatan": return { text: "text-rose-700", bg: "bg-rose-50/70", border: "border-rose-100", accent: "bg-rose-600", accentText: "text-rose-600" };
         case "hiburan": return { text: "text-purple-700", bg: "bg-purple-50/70", border: "border-purple-100", accent: "bg-purple-600", accentText: "text-purple-600" };
+        case "rekomendasi": return { text: "text-amber-700", bg: "bg-amber-50/70", border: "border-amber-100", accent: "bg-amber-500", accentText: "text-amber-500" };
         default: return { text: "text-[#0D2B5C]", bg: "bg-slate-50/70", border: "border-slate-100", accent: "bg-[#0D2B5C]", accentText: "text-[#0D2B5C]" };
       }
     };
@@ -435,6 +444,7 @@ export default function PortalHome({
 
     const getCategoryDescription = (cat: string) => {
       switch (cat.toLowerCase()) {
+        case "rekomendasi": return lang === "ID" ? "Daftar artikel pilihan terbaik dan terpopuler yang direkomendasikan langsung oleh redaksi Poros Madura untuk Anda." : "A list of the best and most popular articles recommended directly for you by the Poros Madura editorial desk.";
         case "politik": return lang === "ID" ? "Analisis tajam dinamika kekuasaan, regulasi, parlemen, dan kebijakan publik nasional." : "Sharp analysis of power dynamics, regulation, parliament, and national public policy.";
         case "nasional": return lang === "ID" ? "Kumpulan peristiwa penting, pembangunan infrastruktur, dan agenda kenegaraan Republik Indonesia." : "Collection of key events, infrastructure development, and state agendas of the Republic of Indonesia.";
         case "teknologi": return lang === "ID" ? "Menjelajahi revolusi digital, kecerdasan buatan (AI), keamanan siber, dan ekosistem startup terdepan." : "Exploring digital revolution, artificial intelligence (AI), cybersecurity, and cutting-edge startup ecosystems.";
@@ -1494,8 +1504,9 @@ export default function PortalHome({
                 </h3>
                 <button 
                   onClick={() => {
-                    const el = document.getElementById("aliran-berita-terbaru");
-                    if (el) el.scrollIntoView({ behavior: "smooth" });
+                    if (onCategorySelect) {
+                      onCategorySelect("rekomendasi");
+                    }
                   }}
                   className="text-xs md:text-sm font-semibold text-gray-800 hover:text-[#0a3a8e] flex items-center gap-1 transition-colors group cursor-pointer"
                 >

@@ -1001,6 +1001,13 @@ app.post("/api/categories", (req, res) => {
   res.json({ success: true, categories: db.categories });
 });
 
+app.delete("/api/categories/:name", (req, res) => {
+  const { name } = req.params;
+  db.categories = db.categories.filter(c => c !== name);
+  saveDb();
+  res.json({ success: true, categories: db.categories });
+});
+
 // API: Articles (GET with filters)
 app.get("/api/articles", (req, res) => {
   let list = [...db.articles];

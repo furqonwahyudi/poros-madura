@@ -706,6 +706,23 @@ export default function AdminCMS({ onBackToPortal, lang }: AdminCMSProps) {
     }
   };
 
+  const handleDeleteCategory = async (name: string) => {
+    showConfirm(`Apakah Anda yakin ingin menghapus kategori "${name}"? Semua artikel di kategori ini akan kehilangan asosiasi kategorinya.`, async () => {
+      try {
+        const res = await fetch(`/api/categories/${encodeURIComponent(name)}`, {
+          method: "DELETE"
+        });
+        if (res.ok) {
+          loadAllData();
+          showAlert(`Kategori "${name}" berhasil dihapus.`, "Sukses", "success");
+        }
+      } catch (e) {
+        console.error(e);
+        showAlert("Gagal menghapus kategori.", "Error", "error");
+      }
+    });
+  };
+
   // Tag CRUD Handlers
   const handleAddTag = (e: React.FormEvent) => {
     e.preventDefault();
@@ -1354,6 +1371,16 @@ export default function AdminCMS({ onBackToPortal, lang }: AdminCMSProps) {
                   }`}
                 >
                   ├── Breaking News
+                </button>
+                <button
+                  onClick={() => setActiveMenu("artikel-rekomendasi")}
+                  className={`w-full text-left px-3 py-2 rounded text-[11px] transition-all cursor-pointer font-mono ${
+                    activeMenu === "artikel-rekomendasi"
+                      ? "bg-[#D71920] text-white font-bold"
+                      : "text-slate-400 hover:text-slate-200 hover:bg-slate-800"
+                  }`}
+                >
+                  ├── Rekomendasi
                 </button>
                 <button
                   onClick={() => setActiveMenu("artikel-trending")}
@@ -2416,6 +2443,7 @@ export default function AdminCMS({ onBackToPortal, lang }: AdminCMSProps) {
             activeMenu === "artikel-scheduled" ||
             activeMenu === "artikel-published" ||
             activeMenu === "artikel-breaking" ||
+            activeMenu === "artikel-rekomendasi" ||
             activeMenu === "artikel-trending" ||
             activeMenu === "artikel-recycle") && (
             <div className="flex flex-col gap-8 animate-fade-in">
@@ -2429,6 +2457,7 @@ export default function AdminCMS({ onBackToPortal, lang }: AdminCMSProps) {
                   {activeMenu === "artikel-scheduled" && "ARTIKEL DIJADWALKAN"}
                   {activeMenu === "artikel-published" && "ARTIKEL DIPUBLIKASIKAN"}
                   {activeMenu === "artikel-breaking" && "ARTIKEL BREAKING NEWS"}
+                  {activeMenu === "artikel-rekomendasi" && "ARTIKEL REKOMENDASI"}
                   {activeMenu === "artikel-trending" && "ARTIKEL TRENDING"}
                   {activeMenu === "artikel-recycle" && "RECYCLE BIN (KOTAK SAMPAH)"}
                 </h3>
@@ -2737,7 +2766,7 @@ export default function AdminCMS({ onBackToPortal, lang }: AdminCMSProps) {
                         </label>
                         <label className="flex items-center gap-1.5 cursor-pointer">
                           <input type="checkbox" checked={isEditorChoice} onChange={(e) => setIsEditorChoice(e.target.checked)} className="rounded" />
-                          <span>Pilihan Editor</span>
+                          <span>Rekomendasi</span>
                         </label>
                         <label className="flex items-center gap-1.5 cursor-pointer">
                           <input type="checkbox" checked={isTrending} onChange={(e) => setIsTrending(e.target.checked)} className="rounded" />
@@ -2800,6 +2829,7 @@ export default function AdminCMS({ onBackToPortal, lang }: AdminCMSProps) {
                           if (activeMenu === "artikel-scheduled") return art.status === "scheduled";
                           if (activeMenu === "artikel-published") return art.status === "published" || !art.status;
                           if (activeMenu === "artikel-breaking") return art.isBreaking;
+                          if (activeMenu === "artikel-rekomendasi") return art.isEditorChoice;
                           if (activeMenu === "artikel-trending") return art.isTrending;
                           return true; // "artikel" (All Articles)
                         })).map(a => (
@@ -2873,54 +2903,87 @@ export default function AdminCMS({ onBackToPortal, lang }: AdminCMSProps) {
                 <span className="text-[10px] text-slate-600 font-mono bg-slate-900 px-2.5 py-1 rounded-full border border-slate-800">{categories.length} kategori aktif</span>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {/* Add Category Form */}
-                <div className="bg-slate-900 border border-slate-800 rounded-xl p-6">
-                  <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-2">
-                    <PlusCircle size={13} className="text-[#D71920]" />
-                    Tambah Kategori Baru
-                  </h4>
-                  <form onSubmit={handleAddCategory} className="flex gap-2 mb-6">
-                    <input
-                      type="text"
-                      required
-                      placeholder="Nama kategori..."
-                      value={newCatName}
-                      onChange={(e) => setNewCatName(e.target.value)}
-                      className="flex-1 px-3 py-2.5 bg-slate-950 border border-slate-800 rounded-lg text-xs text-white focus:outline-none focus:ring-1 focus:ring-[#D71920]"
-                    />
-                    <button type="submit" className="bg-[#D71920] text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-[#D71920]/90 transition-colors cursor-pointer">
-                      Tambah
-                    </button>
-                  </form>
-
-                  <div className="flex flex-wrap gap-2.5">
-                    {categories.map(c => (
-                      <span key={c} className="bg-slate-950 border border-slate-800 text-slate-300 text-xs px-3.5 py-1.5 rounded-full flex items-center gap-1.5 group">
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#D71920]"></span>
-                        <span>{c}</span>
-                      </span>
-                    ))}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* Left Card: Add Category Form */}
+                <div className="lg:col-span-1 flex flex-col gap-6">
+                  <div className="bg-slate-900 border border-slate-800 rounded-xl p-6">
+                    <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-2">
+                      <PlusCircle size={13} className="text-[#D71920]" />
+                      Tambah Kategori Baru
+                    </h4>
+                    <form onSubmit={handleAddCategory} className="flex flex-col gap-3">
+                      <input
+                        type="text"
+                        required
+                        placeholder="Nama kategori..."
+                        value={newCatName}
+                        onChange={(e) => setNewCatName(e.target.value)}
+                        className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-lg text-xs text-white focus:outline-none focus:ring-1 focus:ring-[#D71920]"
+                      />
+                      <button type="submit" className="w-full bg-[#D71920] text-white py-2.5 rounded-lg text-xs font-bold hover:bg-[#D71920]/90 transition-colors cursor-pointer">
+                        Tambah Kategori
+                      </button>
+                    </form>
+                  </div>
+                  
+                  {/* Category Info helper card */}
+                  <div className="bg-slate-900/50 border border-slate-800/60 rounded-xl p-6">
+                    <h5 className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">Panduan Kategori</h5>
+                    <p className="text-xs text-slate-500 leading-relaxed font-light">
+                      Kategori digunakan untuk mengelompokkan artikel berita pada menu utama portal. Menghapus kategori tidak akan menghapus artikel, namun artikel tersebut akan menjadi tidak memiliki kategori (Uncategorized) hingga Anda mengeditnya kembali.
+                    </p>
                   </div>
                 </div>
 
-                {/* Stats */}
-                <div className="bg-slate-900 border border-slate-800 rounded-xl p-6">
-                  <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Artikel per Kategori</h4>
-                  <div className="flex flex-col gap-2.5">
-                    {categories.slice(0, 8).map((c, i) => {
-                      const count = Math.floor(Math.random() * 80 + 10);
-                      const pct = Math.min(100, Math.round(count / 1.2));
-                      return (
-                        <div key={c} className="flex items-center gap-3">
-                          <span className="text-xs text-slate-400 w-28 truncate font-medium">{c}</span>
-                          <div className="flex-1 bg-slate-800 rounded-full h-1.5 overflow-hidden">
-                            <div className="h-full bg-[#D71920] rounded-full transition-all" style={{ width: `${pct}%` }} />
-                          </div>
-                          <span className="text-[10px] font-mono text-slate-500 w-8 text-right">{count}</span>
-                        </div>
-                      );
-                    })}
+                {/* Right Card: Category List Table */}
+                <div className="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-xl p-6">
+                  <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Daftar Kategori & Statistik Konten</h4>
+                  
+                  <div className="overflow-x-auto max-h-[500px] overflow-y-auto pr-2">
+                    <table className="w-full text-left border-collapse">
+                      <thead>
+                        <tr className="border-b border-slate-800 text-[10px] uppercase font-mono text-slate-500 tracking-wider">
+                          <th className="py-3 px-3">Nama Kategori</th>
+                          <th className="py-3 px-3 text-center">Jumlah Artikel</th>
+                          <th className="py-3 px-3 text-center">Kontribusi (%)</th>
+                          <th className="py-3 px-3 text-right">Aksi</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-800/40">
+                        {categories.map((c) => {
+                          const count = articles.filter(a => a.category === c).length;
+                          const totalArticles = articles.length || 1;
+                          const contributionPct = Math.round((count / totalArticles) * 100);
+                          return (
+                            <tr key={c} className="hover:bg-slate-800/30 transition-colors group">
+                              <td className="py-3 px-3">
+                                <div className="flex items-center gap-2">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-[#D71920]" />
+                                  <span className="text-xs font-bold text-white">{c}</span>
+                                </div>
+                              </td>
+                              <td className="py-3 px-3 text-center">
+                                <span className="text-[10px] font-mono font-bold text-[#D71920] bg-[#D71920]/10 px-2.5 py-0.5 rounded-full">
+                                  {count} Artikel
+                                </span>
+                              </td>
+                              <td className="py-3 px-3 text-center text-xs font-mono text-slate-450 font-medium">
+                                {contributionPct}%
+                              </td>
+                              <td className="py-3 px-3 text-right">
+                                <button
+                                  onClick={() => handleDeleteCategory(c)}
+                                  className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 text-red-500 hover:text-red-400 cursor-pointer rounded-lg hover:bg-slate-800"
+                                  title={`Hapus kategori ${c}`}
+                                >
+                                  <Trash2 size={13} />
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
                   </div>
                 </div>
               </div>
@@ -2970,11 +3033,11 @@ export default function AdminCMS({ onBackToPortal, lang }: AdminCMSProps) {
                   <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Tag Terpopuler</h4>
                   <div className="flex flex-wrap gap-2">
                     {tags.map(t => {
-                      const count = Math.floor(Math.random() * 80 + 10);
+                      const count = articles.filter(a => a.tags && a.tags.some(tg => tg.toLowerCase() === t.toLowerCase())).length;
                       return (
-                        <div key={t} className="group flex items-center gap-1.5 bg-slate-950 border border-slate-800 hover:border-slate-650 px-3 py-1.5 rounded-full transition-all cursor-pointer">
+                        <div key={t} className="group flex items-center gap-1.5 bg-slate-950 border border-slate-800 hover:border-slate-700 px-3 py-1.5 rounded-full transition-all cursor-pointer">
                           <span className="text-xs text-slate-300 font-mono">#{t}</span>
-                          <span className="text-[10px] text-slate-600 font-mono bg-slate-900 px-1.5 py-0.5 rounded-full">{count}</span>
+                          <span className="text-[10px] text-slate-500 font-mono bg-slate-900 px-1.5 py-0.5 rounded-full">{count}</span>
                           <button 
                             type="button"
                             onClick={() => handleDeleteTag(t)}
