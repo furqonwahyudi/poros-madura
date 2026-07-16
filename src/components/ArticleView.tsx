@@ -474,7 +474,7 @@ export default function ArticleView({ article, onBack, lang, onSelectArticle }: 
                       <h5 className="text-xs font-bold text-gray-800 line-clamp-2 leading-tight group-hover:text-[#1E40AF] transition-colors">
                         {art.title}
                       </h5>
-                      <span className="text-[9px] text-[#1E40AF] font-bold uppercase tracking-wider block mt-1">{art.category}</span>
+                      <span className="text-[9px] text-[#1E40AF] font-bold uppercase tracking-wider block mt-1">{art.subCategory || art.category}</span>
                     </div>
                   </div>
                 ))}

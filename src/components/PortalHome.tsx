@@ -211,10 +211,18 @@ export default function PortalHome({
           (a.content && a.content.toLowerCase().includes(query))
         );
       }
+      // Sort articles by publishDate descending (newest first)
+      result.sort((a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime());
+      
       setArticles(result);
       setLoading(false);
     }, 500); // Simulate network delay
   }, [selectedCategory, selectedSubCategory, searchQuery]);
+
+  const isCategory = (a: Article, catName: string) => {
+    const cLower = catName.toLowerCase();
+    return a.category?.toLowerCase() === cLower || a.subCategory?.toLowerCase() === cLower;
+  };
 
   useEffect(() => {
     setRecentPage(1);
@@ -1481,7 +1489,7 @@ export default function PortalHome({
                       </div>
                       <div className="flex flex-col">
                         <span className="text-[9px] sm:text-[10px] text-[#f15a24] font-semibold tracking-wide block mb-1 uppercase">
-                          {art.category}
+                          {art.subCategory || art.category}
                         </span>
                         <h4 className="text-[11px] sm:text-xs font-bold text-gray-900 leading-snug line-clamp-3 group-hover:text-[#0a3a8e] transition-colors">
                           {art.title}
@@ -1533,7 +1541,7 @@ export default function PortalHome({
                     <div>
                       <div className="flex items-center gap-2 mb-1">
                         <span className="text-[10px] text-[#1E40AF] font-bold uppercase tracking-wider">
-                          {art.category}
+                          {art.subCategory || art.category}
                         </span>
                         <span className="text-gray-300 text-[10px]">•</span>
                         <span className="text-[10px] text-gray-400 font-mono">
@@ -1646,7 +1654,7 @@ export default function PortalHome({
                     <div>
                       <div className="flex items-center gap-2 mb-1">
                         <span className="text-[10px] text-[#1E40AF] font-bold uppercase tracking-wider">
-                          {art.category}
+                          {art.subCategory || art.category}
                         </span>
                         <span className="text-gray-300 text-[10px]">•</span>
                         <span className="text-[10px] text-gray-400 font-mono">
@@ -1826,7 +1834,7 @@ export default function PortalHome({
                       <div>
                         <div className="flex items-center gap-2 mb-1">
                           <span className="text-[10px] text-[#1E40AF] font-bold uppercase tracking-wider">
-                            {art.category}
+                            {art.subCategory || art.category}
                           </span>
                           <span className="text-gray-300 text-[10px]">•</span>
                           <span className="text-[10px] text-gray-400 font-mono">
@@ -2218,7 +2226,7 @@ export default function PortalHome({
                         {art.title}
                       </h5>
                       <span className="text-[9px] text-[#1E40AF] font-bold uppercase tracking-wider block mt-1">
-                        {art.category}
+                        {art.subCategory || art.category}
                       </span>
                     </div>
                   </div>
@@ -2528,7 +2536,7 @@ export default function PortalHome({
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-transparent flex flex-col justify-end p-4">
                       <span className="text-[10px] font-black uppercase tracking-wider text-red-400 mb-1">
-                        {firstArt.category || "Lifestyle"}
+                        {firstArt.subCategory || firstArt.category || "Lifestyle"}
                       </span>
                       <h5 className="text-xs sm:text-sm font-bold text-white line-clamp-2 leading-snug group-hover:text-red-400 transition-colors">
                         {firstArt.title}
@@ -2548,7 +2556,7 @@ export default function PortalHome({
                         className="cursor-pointer group flex flex-col gap-1 border-b border-gray-100 pb-3 last:border-0 last:pb-0"
                       >
                         <span className="text-[10px] font-black uppercase tracking-wider text-[#D71920]">
-                          {art.category || "Lifestyle"}
+                          {art.subCategory || art.category || "Lifestyle"}
                         </span>
                         <h5 className="text-xs sm:text-sm font-bold text-gray-900 leading-snug line-clamp-2 group-hover:text-[#1E40AF] transition-colors">
                           {art.title}

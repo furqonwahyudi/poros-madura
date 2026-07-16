@@ -44,8 +44,36 @@ export const AdProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       { id: "5", slug: "sidebar-rectangle-2", name: "Sidebar 2", size: "300x250", type: "display", page: "all", status: "active", priority: 1, lazyLoad: true, sticky: false, floating: false, closeButton: false, responsive: true },
       { id: "6", slug: "article-bottom-leaderboard", name: "Article Bottom", size: "728x90", type: "display", page: "all", status: "active", priority: 1, lazyLoad: true, sticky: false, floating: false, closeButton: false, responsive: true },
       { id: "7", slug: "floating-left-skyscraper", name: "Floating Left", size: "160x600", type: "floating", page: "all", status: "active", priority: 1, lazyLoad: false, sticky: true, floating: true, closeButton: false, responsive: true, isPremium: true, reserveLayout: true },
-      { id: "8", slug: "floating-right-skyscraper", name: "Floating Right", size: "160x600", type: "floating", page: "all", status: "active", priority: 1, lazyLoad: false, sticky: true, floating: true, closeButton: false, responsive: true, isPremium: true, reserveLayout: true }
-    ]);
+      { id: "8", slug: "floating-right-skyscraper", name: "Floating Right", size: "160x600", type: "floating", page: "all", status: "active", priority: 1, lazyLoad: false, sticky: true, floating: true, closeButton: false, responsive: true, isPremium: true, reserveLayout: true },
+      
+      // Slugs newly discovered from grep
+      { id: "9", slug: "category-banner", name: "Category Banner", size: "728x90", type: "display", page: "all", status: "active", priority: 1 },
+      { id: "10", slug: "sidebar-top", name: "Sidebar Top", size: "300x250", type: "display", page: "all", status: "active", priority: 1 },
+      { id: "11", slug: "sidebar-middle", name: "Sidebar Middle", size: "300x250", type: "display", page: "all", status: "active", priority: 1 },
+      { id: "12", slug: "sidebar-bottom", name: "Sidebar Bottom", size: "300x250", type: "display", page: "all", status: "active", priority: 1 },
+      { id: "13", slug: "sidebar-sticky", name: "Sidebar Sticky", size: "300x600", type: "display", page: "all", status: "active", priority: 1, sticky: true },
+      { id: "14", slug: "in-feed-1", name: "In Feed 1", size: "300x250", type: "display", page: "all", status: "active", priority: 1 },
+      { id: "15", slug: "in-feed-2", name: "In Feed 2", size: "300x250", type: "display", page: "all", status: "active", priority: 1 },
+      { id: "16", slug: "homepage-banner-atas", name: "Homepage Banner Atas", size: "728x90", type: "display", page: "all", status: "active", priority: 1 },
+      { id: "17", slug: "hero-banner", name: "Hero Banner", size: "728x90", type: "display", page: "all", status: "active", priority: 1 },
+      { id: "18", slug: "homepage-banner-tengah", name: "Homepage Banner Tengah", size: "728x250", type: "display", page: "all", status: "active", priority: 1 },
+      { id: "19", slug: "mobile-in-feed-banner", name: "Mobile In Feed Banner", size: "320x100", type: "display", page: "all", status: "active", priority: 1 },
+      { id: "20", slug: "in-feed-3", name: "In Feed 3", size: "728x90", type: "display", page: "all", status: "active", priority: 1 },
+      { id: "21", slug: "in-feed-4", name: "In Feed 4", size: "728x90", type: "display", page: "all", status: "active", priority: 1 },
+      { id: "22", slug: "homepage-banner-bawah", name: "Homepage Banner Bawah", size: "728x90", type: "display", page: "all", status: "active", priority: 1 },
+      { id: "23", slug: "breaking-news-banner", name: "Breaking News Banner", size: "728x90", type: "display", page: "all", status: "active", priority: 1 },
+      { id: "24", slug: "in-article-1", name: "In Article 1", size: "728x90", type: "display", page: "all", status: "active", priority: 1 },
+      { id: "25", slug: "in-article-2", name: "In Article 2", size: "728x90", type: "display", page: "all", status: "active", priority: 1 },
+      { id: "26", slug: "in-article-3", name: "In Article 3", size: "728x90", type: "display", page: "all", status: "active", priority: 1 },
+      { id: "27", slug: "in-article-4", name: "In Article 4", size: "728x90", type: "display", page: "all", status: "active", priority: 1 },
+      { id: "28", slug: "video-banner", name: "Video Banner", size: "300x250", type: "display", page: "all", status: "active", priority: 1 },
+      { id: "29", slug: "related-news-banner", name: "Related News Banner", size: "728x90", type: "display", page: "all", status: "active", priority: 1 },
+      { id: "30", slug: "footer-billboard", name: "Footer Billboard", size: "970x250", type: "display", page: "all", status: "active", priority: 1 },
+      { id: "31", slug: "footer-banner", name: "Footer Banner", size: "728x90", type: "display", page: "all", status: "active", priority: 1 },
+      { id: "32", slug: "top-billboard", name: "Top Billboard", size: "970x250", type: "display", page: "all", status: "active", priority: 1 },
+      { id: "33", slug: "popup-interstitial", name: "Popup Interstitial", size: "300x250", type: "popup", page: "all", status: "active", priority: 1 },
+      { id: "34", slug: "mobile-anchor-banner", name: "Mobile Anchor Banner", size: "320x50", type: "display", page: "all", status: "active", priority: 1, sticky: true }
+    ] as AdSlot[]);
     setLoading(false);
   };
 
