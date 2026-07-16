@@ -907,6 +907,18 @@ export default function PortalHome({
                   </div>
 
 
+                  {/* Inject In-Feed Ads */}
+                  {idx === 4 && (
+                    <div className="w-full my-4 flex justify-center">
+                      <AdManagerSlot slug="in-feed-1" page="kategori" category={selectedCategory} />
+                    </div>
+                  )}
+                  {idx === 9 && (
+                    <div className="w-full my-4 flex justify-center">
+                      <AdManagerSlot slug="in-feed-2" page="kategori" category={selectedCategory} />
+                    </div>
+                  )}
+
                 </React.Fragment>
               ))}
             </div>
@@ -1148,11 +1160,7 @@ export default function PortalHome({
 
         </div>
 
-        {/* In-Feed Ad Slots (Category) */}
-        <div className="w-full mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-          <AdManagerSlot slug="in-feed-1" page="kategori" category={selectedCategory} />
-          <AdManagerSlot slug="in-feed-2" page="kategori" category={selectedCategory} />
-        </div>
+        {/* In-Feed Ad Slots (Category) moved inside the list */}
 
         {/* Photo Lightbox modal */}
         {selectedPhoto && (
