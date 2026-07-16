@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Article, Comment } from "../types";
+import { dummyArticles } from "../data/dummyArticles";
 import AdManagerSlot from "./AdManagerSlot";
 import { formatDate } from "../utils";
 import { 
@@ -27,34 +28,27 @@ export default function ArticleView({ article, onBack, lang, onSelectArticle }: 
 
   // Load comments & related news
   useEffect(() => {
-    async function loadData() {
-      try {
-        // Load comments
-        const resComments = await fetch(`/api/comments/${article.slug}`);
-        if (resComments.ok) {
-          const dataComments = await resComments.json();
-          setComments(dataComments);
-        }
-
-        // Load related news (same category, excluding current)
-        const resRelated = await fetch(`/api/articles?category=${encodeURIComponent(article.category)}`);
-        if (resRelated.ok) {
-          const dataRelated: Article[] = await resRelated.json();
-          setRelatedArticles(dataRelated.filter(a => a.id !== article.id).slice(0, 3));
-        }
-      } catch (e) {
-        console.error("Error loading article metadata", e);
+    // Load mock related news
+    const dataRelated = dummyArticles.filter(a => a.category === article.category);
+    setRelatedArticles(dataRelated.filter(a => a.id !== article.id).slice(0, 3));
+    
+    // Mock comments
+    setComments([
+      {
+        id: "1",
+        author: "Pembaca Setia",
+        content: "Berita yang sangat informatif. Terima kasih Poros Madura!",
+        timestamp: new Date().toISOString(),
+        likes: 12,
+        dislikes: 0,
+        replies: []
       }
-    }
-    loadData();
+    ]);
+    
     window.scrollTo(0, 0);
   }, [article]);
 
   const handleShareClick = (platform: string) => {
-    // Record share click on the backend
-    fetch(`/api/articles/${article.slug}/share`, { method: "POST" })
-      .catch(err => console.error(err));
-
     const shareUrl = window.location.href;
     const shareText = `Baca berita menarik ini di Poros Madura: "${article.title}" - ${shareUrl}`;
 
@@ -77,68 +71,54 @@ export default function ArticleView({ article, onBack, lang, onSelectArticle }: 
     e.preventDefault();
     if (!newCommentAuthor.trim() || !newCommentContent.trim()) return;
 
-    try {
-      const res = await fetch(`/api/comments/${article.slug}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          author: newCommentAuthor.trim(),
-          content: newCommentContent.trim()
-        })
-      });
-      if (res.ok) {
-        setNewCommentAuthor("");
-        setNewCommentContent("");
-        // Refresh comments list
-        const resComments = await fetch(`/api/comments/${article.slug}`);
-        const dataComments = await resComments.json();
-        setComments(dataComments);
-      }
-    } catch (err) {
-      console.error("Error posting comment", err);
-    }
+    const newComment: Comment = {
+      id: String(Date.now()),
+      author: newCommentAuthor.trim(),
+      content: newCommentContent.trim(),
+      timestamp: new Date().toISOString(),
+      likes: 0,
+      dislikes: 0,
+      replies: []
+    };
+    
+    setComments([...comments, newComment]);
+    setNewCommentAuthor("");
+    setNewCommentContent("");
   };
 
   const handlePostReply = async (e: React.FormEvent, parentId: string) => {
     e.preventDefault();
     if (!replyAuthor.trim() || !replyContent.trim()) return;
 
-    try {
-      const res = await fetch(`/api/comments/${article.slug}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          author: replyAuthor.trim(),
-          content: replyContent.trim(),
-          parentId
-        })
-      });
-      if (res.ok) {
-        setReplyAuthor("");
-        setReplyContent("");
-        setReplyingTo(null);
-        // Refresh comments list
-        const resComments = await fetch(`/api/comments/${article.slug}`);
-        const dataComments = await resComments.json();
-        setComments(dataComments);
+    setComments(comments.map(c => {
+      if (c.id === parentId) {
+        return {
+          ...c,
+          replies: [...(c.replies || []), {
+            id: String(Date.now()),
+            author: replyAuthor.trim(),
+            content: replyContent.trim(),
+            timestamp: new Date().toISOString(),
+            likes: 0,
+            dislikes: 0
+          }]
+        };
       }
-    } catch (err) {
-      console.error("Error posting reply", err);
-    }
+      return c;
+    }));
+
+    setReplyAuthor("");
+    setReplyContent("");
+    setReplyingTo(null);
   };
 
   const handleLikeComment = async (commentId: string) => {
-    try {
-      const res = await fetch(`/api/comments/${commentId}/like`, { method: "POST" });
-      if (res.ok) {
-        // Refresh comments list
-        const resComments = await fetch(`/api/comments/${article.slug}`);
-        const dataComments = await resComments.json();
-        setComments(dataComments);
+    setComments(comments.map(c => {
+      if (c.id === commentId) {
+        return { ...c, likes: c.likes + 1 };
       }
-    } catch (e) {
-      console.error("Like failed", e);
-    }
+      return c;
+    }));
   };
 
   // Estimate reading time based on Indonesian reading speed (~200 WPM)

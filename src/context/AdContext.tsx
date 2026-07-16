@@ -35,33 +35,18 @@ export const AdProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   const [loading, setLoading] = useState(true);
 
   const loadAdSystemData = async () => {
-    try {
-      const [
-        resAds, resSlots, resSettings, resAdvertisers, resCampaigns, resCategories, resPricing, resMedia
-      ] = await Promise.all([
-        fetch("/api/ads"),
-        fetch("/api/ad-slots"),
-        fetch("/api/ad-settings"),
-        fetch("/api/advertisers"),
-        fetch("/api/campaigns"),
-        fetch("/api/ad-categories"),
-        fetch("/api/ad-pricing"),
-        fetch("/api/ad-media")
-      ]);
-
-      if (resAds.ok) setAds(await resAds.json());
-      if (resSlots.ok) setAdSlots(await resSlots.json());
-      if (resSettings.ok) setAdSettings(await resSettings.json());
-      if (resAdvertisers.ok) setAdvertisers(await resAdvertisers.json());
-      if (resCampaigns.ok) setCampaigns(await resCampaigns.json());
-      if (resCategories.ok) setAdCategories(await resCategories.json());
-      if (resPricing.ok) setAdPricing(await resPricing.json());
-      if (resMedia.ok) setAdMediaLibrary(await resMedia.json());
-    } catch (err) {
-      console.error("Failed to load enterprise ad system data:", err);
-    } finally {
-      setLoading(false);
-    }
+    // Provide mock active slots so placeholders render on frontend
+    setAdSlots([
+      { id: "1", slug: "header-banner", name: "Header Banner", size: "728x90", type: "display", page: "all", status: "active", priority: 1, lazyLoad: false, sticky: false, floating: false, closeButton: false, responsive: true },
+      { id: "2", slug: "top-leaderboard", name: "Top Leaderboard", size: "970x90", type: "display", page: "all", status: "active", priority: 1, lazyLoad: false, sticky: false, floating: false, closeButton: false, responsive: true },
+      { id: "3", slug: "article-top-leaderboard", name: "Article Top", size: "728x90", type: "display", page: "all", status: "active", priority: 1, lazyLoad: false, sticky: false, floating: false, closeButton: false, responsive: true },
+      { id: "4", slug: "sidebar-rectangle-1", name: "Sidebar 1", size: "300x250", type: "display", page: "all", status: "active", priority: 1, lazyLoad: true, sticky: true, floating: false, closeButton: false, responsive: true },
+      { id: "5", slug: "sidebar-rectangle-2", name: "Sidebar 2", size: "300x250", type: "display", page: "all", status: "active", priority: 1, lazyLoad: true, sticky: false, floating: false, closeButton: false, responsive: true },
+      { id: "6", slug: "article-bottom-leaderboard", name: "Article Bottom", size: "728x90", type: "display", page: "all", status: "active", priority: 1, lazyLoad: true, sticky: false, floating: false, closeButton: false, responsive: true },
+      { id: "7", slug: "floating-left-skyscraper", name: "Floating Left", size: "160x600", type: "floating", page: "all", status: "active", priority: 1, lazyLoad: false, sticky: true, floating: true, closeButton: false, responsive: true, isPremium: true, reserveLayout: true },
+      { id: "8", slug: "floating-right-skyscraper", name: "Floating Right", size: "160x600", type: "floating", page: "all", status: "active", priority: 1, lazyLoad: false, sticky: true, floating: true, closeButton: false, responsive: true, isPremium: true, reserveLayout: true }
+    ]);
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -69,19 +54,11 @@ export const AdProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   }, []);
 
   const trackImpression = (adId: string) => {
-    fetch("/api/ads/track", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ adId, action: "impression" })
-    }).catch(err => console.error("Failed to track ad impression:", err));
+    // Mock
   };
 
   const trackClick = (adId: string) => {
-    fetch("/api/ads/track", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ adId, action: "click" })
-    }).catch(err => console.error("Failed to track ad click:", err));
+    // Mock
   };
 
   const getAdForSlot = (

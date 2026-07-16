@@ -5,6 +5,7 @@ import { Article } from "../types";
 import AdManagerSlot from "./AdManagerSlot";
 import logoUrl from "@/Logo_Type_trans.png";
 import iconUrl from "@/ICON.png";
+import { dummyArticles } from "../data/dummyArticles";
 
 interface PortalHeaderProps {
   onCategorySelect: (category: string | null, subCategory?: string | null) => void;
@@ -14,7 +15,6 @@ interface PortalHeaderProps {
   onSelectArticle: (article: Article) => void;
   lang: "ID" | "EN";
   setLang: (l: "ID" | "EN") => void;
-  onGoToAdmin: () => void;
   currentPage: string;
 }
 
@@ -34,7 +34,6 @@ export default function PortalHeader({
   onSelectArticle,
   lang,
   setLang,
-  onGoToAdmin,
   currentPage
 }: PortalHeaderProps) {
   const [currentTime, setCurrentTime] = useState("");
@@ -180,39 +179,20 @@ export default function PortalHeader({
 
   // Fetch breaking news for the ticker
   useEffect(() => {
-    fetch("/api/articles")
-      .then(res => {
-        if (!res.ok) throw new Error("Network response was not ok");
-        const contentType = res.headers.get("content-type");
-        if (contentType && contentType.includes("application/json")) {
-          return res.json();
-        }
-        throw new Error("Response was not JSON");
-      })
-      .then((data: Article[]) => {
-        setBreakingNews(data.slice(0, 5));
-      })
-      .catch(err => console.error("Error fetching breaking news", err));
+    // Fallback to dummy data
+    const news = dummyArticles.filter(a => a.isBreaking);
+    setBreakingNews(news.length > 0 ? news.slice(0, 5) : dummyArticles.slice(0, 5));
   }, []);
-
-
 
   // Suggestions search logic
   useEffect(() => {
     if (searchQuery.trim().length > 1) {
-      fetch(`/api/articles?search=${encodeURIComponent(searchQuery)}`)
-        .then(res => {
-          if (!res.ok) throw new Error("Network response was not ok");
-          const contentType = res.headers.get("content-type");
-          if (contentType && contentType.includes("application/json")) {
-            return res.json();
-          }
-          throw new Error("Response was not JSON");
-        })
-        .then((data: Article[]) => {
-          setSuggestions(data.slice(0, 5));
-        })
-        .catch(err => console.error("Error searching suggestions", err));
+      const query = searchQuery.toLowerCase();
+      const results = dummyArticles.filter(a => 
+        a.title.toLowerCase().includes(query) || 
+        (a.category && a.category.toLowerCase().includes(query))
+      );
+      setSuggestions(results.slice(0, 5));
     } else {
       setSuggestions([]);
     }
@@ -269,16 +249,6 @@ export default function PortalHeader({
           >
             <Globe size={12} />
             <span className="font-bold tracking-wider">{lang}</span>
-          </button>
-
-          {/* CMS Button */}
-          <button 
-            id="btn-goto-cms"
-            onClick={onGoToAdmin}
-            className="flex items-center gap-1 bg-[#D71920] text-white px-3 py-1 rounded-full font-bold text-[11px] shadow-sm hover:scale-105 transition-transform cursor-pointer"
-          >
-            <Sparkles size={11} />
-            <span>CMS ADMIN</span>
           </button>
         </div>
       </div>

@@ -3,12 +3,11 @@ import PortalHeader from "./components/PortalHeader";
 import PortalHome from "./components/PortalHome";
 import ArticleView from "./components/ArticleView";
 import PortalFooter from "./components/PortalFooter";
-import AdminCMS from "./components/AdminCMS";
-import { Article } from "./types";
-import { AdProvider } from "./context/AdContext";
 import { DialogProvider } from "./context/DialogContext";
 import AdManagerSlot from "./components/AdManagerSlot";
 import FloatingAdLayout from "./components/FloatingAdLayout";
+import { dummyArticles } from "./data/dummyArticles";
+import { Article } from "./types";
 
 const categoryHierarchy: Record<string, string[]> = {
   "Berita": [],
@@ -32,7 +31,6 @@ function slugify(text: string): string {
 
 export default function App() {
   const [lang, setLang] = useState<"ID" | "EN">("ID");
-  const [isCmsMode, setIsCmsMode] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedSubCategory, setSelectedSubCategory] = useState<string | null>(null);
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
@@ -69,10 +67,6 @@ export default function App() {
       }
       
       const segments = path.split("/").filter(Boolean);
-      if (segments[0] === "admin") {
-        setIsCmsMode(true);
-        return;
-      }
       
       if (segments[0] === "rekomendasi") {
         setSelectedCategory("rekomendasi");
@@ -90,17 +84,12 @@ export default function App() {
           setSelectedSubCategory(null);
           setSelectedArticle(null);
         } else {
-          // Fallback check if it's an article slug at root level
-          try {
-            const res = await fetch(`/api/articles/slug/${segments[0]}`);
-            if (res.ok) {
-              const article = await res.json();
-              setSelectedArticle(article);
-              setSelectedCategory(article.category || null);
-              setSelectedSubCategory(article.subCategory || null);
-            }
-          } catch (e) {
-            console.error(e);
+          // Check if it's an article slug at root level
+          const article = dummyArticles.find(a => a.slug === segments[0]);
+          if (article) {
+            setSelectedArticle(article);
+            setSelectedCategory(article.category || null);
+            setSelectedSubCategory(article.subCategory || null);
           }
         }
       } else if (segments.length === 2) {
@@ -122,16 +111,11 @@ export default function App() {
           setSelectedArticle(null);
         } else {
           // It is a detail article: /:parent/:slug
-          try {
-            const res = await fetch(`/api/articles/slug/${subSegment}`);
-            if (res.ok) {
-              const article = await res.json();
-              setSelectedArticle(article);
-              setSelectedCategory(parentMatch || null);
-              setSelectedSubCategory(article.subCategory || null);
-            }
-          } catch (e) {
-            console.error(e);
+          const article = dummyArticles.find(a => a.slug === subSegment);
+          if (article) {
+            setSelectedArticle(article);
+            setSelectedCategory(parentMatch || null);
+            setSelectedSubCategory(article.subCategory || null);
           }
         }
       }
@@ -178,29 +162,14 @@ export default function App() {
     navigateTo(`/${slugify(parentCategory)}/${article.slug}`, { dispatch: false });
   };
 
-  if (isCmsMode) {
-    return (
-      <DialogProvider>
-        <AdProvider>
-          <AdminCMS 
-            onBackToPortal={() => {
-              setIsCmsMode(false);
-              window.scrollTo(0, 0);
-            }}
-            lang={lang}
-          />
-        </AdProvider>
-      </DialogProvider>
-    );
-  }
+
 
   // Determine current page context for ad targeting
   const currentPage = selectedArticle ? "artikel" : selectedCategory ? "kategori" : "homepage";
 
   return (
     <DialogProvider>
-      <AdProvider>
-        {/* ── Full-screen wrapper ────────────────────────────────────────── */}
+      {/* ── Full-screen wrapper ────────────────────────────────────────── */}
       <div id="portal-root" className="flex flex-col min-h-screen bg-[#FAFAFB]">
 
         {/* Global Top Billboard (above everything, full-width) */}
@@ -238,7 +207,6 @@ export default function App() {
                 onSelectArticle={handleSelectArticle}
                 lang={lang}
                 setLang={setLang}
-                onGoToAdmin={() => setIsCmsMode(true)}
                 currentPage={currentPage}
               />
 
@@ -282,7 +250,6 @@ export default function App() {
           </FloatingAdLayout>
         </div>
       </div>
-      </AdProvider>
     </DialogProvider>
   );
 }

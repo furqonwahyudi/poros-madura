@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { Article } from "../types";
 import { formatDate } from "../utils";
+import { dummyArticles } from "../data/dummyArticles";
 import AdManagerSlot from "./AdManagerSlot";
 import { 
   TrendingUp, Award, Calendar, Share2, Eye, EyeOff, BookOpen, Clock, 
@@ -193,90 +194,26 @@ export default function PortalHome({
   });
 
   useEffect(() => {
-    let isMounted = true;
-
-    async function loadSettings() {
-      try {
-        const res = await fetch("/api/market/settings");
-        if (res.ok) {
-          const data = await res.json();
-          if (isMounted && data) {
-            setMarketSettings({
-              enabled: data.enabled ?? true,
-              displayMarkets: data.displayMarkets || ["ihsg", "usd", "gold"]
-            });
-          }
-        }
-      } catch (err) {
-        console.error("Failed to load market settings:", err);
+    // Load articles from dummy data
+    setLoading(true);
+    setTimeout(() => {
+      let result = dummyArticles;
+      const activeCat = selectedSubCategory || selectedCategory;
+      if (activeCat && activeCat !== "rekomendasi") {
+        result = result.filter(a => 
+          a.category?.toLowerCase() === activeCat.toLowerCase() || 
+          a.subCategory?.toLowerCase() === activeCat.toLowerCase()
+        );
+      } else if (searchQuery) {
+        const query = searchQuery.toLowerCase();
+        result = result.filter(a => 
+          a.title.toLowerCase().includes(query) || 
+          (a.content && a.content.toLowerCase().includes(query))
+        );
       }
-    }
-
-    async function fetchLiveMarket() {
-      try {
-        const res = await fetch("/api/market/live");
-        if (res.ok) {
-          const data = await res.json();
-          if (isMounted) {
-            setMarketRates({
-              ihsg: data.ihsg || null,
-              usd: data.usd || null,
-              gold: data.gold || null
-            });
-          }
-        }
-      } catch (err) {
-        console.error("Failed to fetch live market rates:", err);
-      }
-    }
-
-    loadSettings();
-    fetchLiveMarket();
-
-    const interval = setInterval(fetchLiveMarket, 30000); // Poll live rate API every 30 seconds
-
-    return () => {
-      isMounted = false;
-      clearInterval(interval);
-    };
-  }, []);
-
-  const isCategory = (a: Article, catName: string) => {
-    const cLower = catName.toLowerCase();
-    return a.category?.toLowerCase() === cLower || a.subCategory?.toLowerCase() === cLower;
-  };
-
-  useEffect(() => {
-    async function loadArticles() {
-      try {
-        if (articles.length === 0) {
-          setLoading(true);
-        }
-        // Fetch published articles
-        let url = "/api/articles";
-        const activeCat = selectedSubCategory || selectedCategory;
-        if (activeCat && activeCat !== "rekomendasi") {
-          url = `/api/articles?category=${encodeURIComponent(activeCat)}`;
-        } else if (searchQuery) {
-          url = `/api/articles?search=${encodeURIComponent(searchQuery)}`;
-        }
-        const res = await fetch(url);
-        if (res.ok) {
-          const contentType = res.headers.get("content-type");
-          if (contentType && contentType.includes("application/json")) {
-            const data = await res.json();
-            setArticles(data);
-          } else {
-            console.warn("Expected JSON but received non-JSON response from /api/articles");
-          }
-        }
-      } catch (e) {
-        console.error("Failed to load articles", e);
-      } finally {
-        setLoading(false);
-      }
-    }
-    loadArticles();
+      setArticles(result);
+      setLoading(false);
+    }, 500); // Simulate network delay
   }, [selectedCategory, selectedSubCategory, searchQuery]);
 
   useEffect(() => {
