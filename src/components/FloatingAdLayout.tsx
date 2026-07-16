@@ -190,10 +190,10 @@ export default function FloatingAdLayout({ children, page, category }: FloatingA
               style={{
                 width: "100%",
                 height: `${adH}px`,
-                border: "1px solid rgba(129,140,248,0.2)",
+                border: "none",
                 borderRadius: "0px",
                 overflow: "hidden",
-                background: "#f8fafc",
+                background: "#EEEEEE",
                 boxShadow: side === "left"
                   ? "4px 0 24px rgba(0,0,0,0.06)"
                   : "-4px 0 24px rgba(0,0,0,0.06)",
@@ -233,8 +233,8 @@ export default function FloatingAdLayout({ children, page, category }: FloatingA
               style={{
                 width: "100%",
                 height: `${adH}px`,
-                border: "1px dashed rgba(148,163,184,0.5)",
-                background: "rgba(241,245,249,0.9)",
+                border: "none",
+                background: "#EEEEEE",
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",

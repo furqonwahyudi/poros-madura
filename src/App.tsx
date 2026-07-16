@@ -11,14 +11,15 @@ import AdManagerSlot from "./components/AdManagerSlot";
 import FloatingAdLayout from "./components/FloatingAdLayout";
 
 const categoryHierarchy: Record<string, string[]> = {
-  "Berita": ["Politik", "Pemerintahan", "Hukum", "Kriminal", "Pendidikan", "Ekonomi", "Kesehatan"],
-  "Daerah": ["Bangkalan", "Sampang", "Pamekasan", "Sumenep", "Madura Raya"],
-  "Nasional": [],
-  "Olahraga": ["Sepak Bola", "Bola Voli", "Basket", "MotoGP"],
-  "Teknologi": ["Gadget", "AI", "Internet", "Startup"],
-  "Otomotif": ["Mobil", "Motor", "Tips"],
-  "Lifestyle": ["Wisata", "Kuliner", "Budaya", "Hiburan"],
-  "Opini": []
+  "Berita": [],
+  "Daerah": ["Bangkalan", "Sampang", "Pamekasan", "Sumenep"],
+  "Nasional": ["Politik", "Pemerintahan", "Hukum", "Kriminal", "Pendidikan", "Kesehatan", "Ekonomi"],
+  "Olahraga": [],
+  "Teknologi": [],
+  "Otomotif": [],
+  "Lainnya": ["Lifestyle", "Budaya", "Wisata", "Kuliner", "Hiburan", "Opini"],
+  "Lifestyle": [], // Keep for backward compatibility if any old articles exist
+  "Opini": [] // Keep for backward compatibility if any old articles exist
 };
 
 function slugify(text: string): string {

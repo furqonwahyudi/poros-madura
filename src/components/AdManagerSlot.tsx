@@ -123,7 +123,7 @@ export default function AdManagerSlot({ slug, page, category, paragraphIndex }: 
       <div 
         ref={containerRef}
         style={placeholderStyle}
-        className={`w-full mx-auto my-3 flex flex-col items-center justify-center border border-dashed border-gray-300 bg-gray-50 text-gray-400 select-none p-4 text-center${slug.startsWith("mobile-") ? " md:hidden" : ""}`}
+        className={`w-full mx-auto my-3 flex flex-col items-center justify-center bg-[#EEEEEE] text-gray-400 select-none p-4 text-center${slug.startsWith("mobile-") ? " md:hidden" : ""}`}
       >
         <span className="text-[10px] font-mono tracking-wider font-extrabold uppercase text-gray-500">
           RUANG IKLAN TERSEDIA ({slotInfo.size})
@@ -212,18 +212,19 @@ export default function AdManagerSlot({ slug, page, category, paragraphIndex }: 
     <div 
       ref={containerRef}
       style={slotStyle}
-      className={`w-full mx-auto my-3 flex flex-col items-center justify-center overflow-hidden border border-gray-200 bg-gray-100 p-0 shadow-2xs${responsiveClass}`}
+      className={`w-full mx-auto my-3 relative bg-[#EEEEEE] p-0 shadow-2xs${responsiveClass}`}
     >
-      {slotInfo?.closeButton && (
-        <div className="w-full flex justify-end items-center mb-1 text-[8px] font-mono font-bold text-gray-400 select-none px-1">
-          <button onClick={() => setIsClosed(true)} className="hover:text-red-500 cursor-pointer flex items-center gap-0.5">
-            <X size={10} />
-            <span>Tutup</span>
-          </button>
-        </div>
-      )}
+      <div className="w-full sticky top-[88px] flex flex-col justify-center items-center">
+        {slotInfo?.closeButton && (
+          <div className="w-full flex justify-end items-center mb-1 text-[8px] font-mono font-bold text-gray-400 select-none px-1">
+            <button onClick={() => setIsClosed(true)} className="hover:text-red-500 cursor-pointer flex items-center gap-0.5">
+              <X size={10} />
+              <span>Tutup</span>
+            </button>
+          </div>
+        )}
 
-      <div className="w-full flex justify-center items-center">
+        <div className="w-full flex justify-center items-center">
         {ad.format === "image" && (
           <a 
             href={ad.landingUrl} 
@@ -281,6 +282,7 @@ export default function AdManagerSlot({ slug, page, category, paragraphIndex }: 
         )}
       </div>
     </div>
+  </div>
   );
 }
 

@@ -81,109 +81,70 @@ export default function PortalHeader({
   const menuItems = [
     { name: { ID: "BERANDA", EN: "HOME" }, category: null },
     {
-      name: { ID: "BERITA", EN: "NEWS" },
-      category: "Berita",
-      subItems: [
-        { name: "Politik", category: "Berita", subCategory: "Politik" },
-        { name: "Pemerintahan", category: "Berita", subCategory: "Pemerintahan" },
-        { name: "Hukum", category: "Berita", subCategory: "Hukum" },
-        { name: "Kriminal", category: "Berita", subCategory: "Kriminal" },
-        { name: "Pendidikan", category: "Berita", subCategory: "Pendidikan" },
-        { name: "Ekonomi", category: "Berita", subCategory: "Ekonomi" },
-        { name: "Kesehatan", category: "Berita", subCategory: "Kesehatan" },
-      ]
-    },
-    {
       name: { ID: "DAERAH", EN: "REGIONS" },
-      category: "Daerah",
+      isWrapper: true,
+      category: null,
       subItems: [
         { name: "Bangkalan", category: "Daerah", subCategory: "Bangkalan" },
         { name: "Sampang", category: "Daerah", subCategory: "Sampang" },
         { name: "Pamekasan", category: "Daerah", subCategory: "Pamekasan" },
         { name: "Sumenep", category: "Daerah", subCategory: "Sumenep" },
-        { name: "Madura Raya", category: "Daerah", subCategory: "Madura Raya" },
-      ]
-    },
-    { name: { ID: "NASIONAL", EN: "NATIONAL" }, category: "Nasional" },
-    {
-      name: { ID: "OLAHRAGA", EN: "SPORTS" },
-      category: "Olahraga",
-      subItems: [
-        { name: "Sepak Bola", category: "Olahraga", subCategory: "Sepak Bola" },
-        { name: "Bola Voli", category: "Olahraga", subCategory: "Bola Voli" },
-        { name: "Basket", category: "Olahraga", subCategory: "Basket" },
-        { name: "MotoGP", category: "Olahraga", subCategory: "MotoGP" },
       ]
     },
     {
-      name: { ID: "TEKNOLOGI", EN: "TECHNOLOGY" },
-      category: "Teknologi",
+      name: { ID: "NASIONAL", EN: "NATIONAL" },
+      isWrapper: true,
+      category: null,
       subItems: [
-        { name: "Gadget", category: "Teknologi", subCategory: "Gadget" },
-        { name: "AI", category: "Teknologi", subCategory: "AI" },
-        { name: "Internet", category: "Teknologi", subCategory: "Internet" },
-        { name: "Startup", category: "Teknologi", subCategory: "Startup" },
+        { name: "Politik", category: "Nasional", subCategory: "Politik" },
+        { name: "Pemerintahan", category: "Nasional", subCategory: "Pemerintahan" },
+        { name: "Hukum", category: "Nasional", subCategory: "Hukum" },
+        { name: "Kriminal", category: "Nasional", subCategory: "Kriminal" },
+        { name: "Pendidikan", category: "Nasional", subCategory: "Pendidikan" },
+        { name: "Kesehatan", category: "Nasional", subCategory: "Kesehatan" },
+        { name: "Ekonomi", category: "Nasional", subCategory: "Ekonomi" },
       ]
     },
+    { name: { ID: "OLAHRAGA", EN: "SPORTS" }, category: "Olahraga" },
+    { name: { ID: "TEKNOLOGI", EN: "TECHNOLOGY" }, category: "Teknologi" },
+    { name: { ID: "OTOMOTIF", EN: "AUTOMOTIVE" }, category: "Otomotif" },
     {
-      name: { ID: "OTOMOTIF", EN: "AUTOMOTIVE" },
-      category: "Otomotif",
+      name: { ID: "LAINNYA", EN: "OTHERS" },
+      isWrapper: true,
+      category: null,
       subItems: [
-        { name: "Mobil", category: "Otomotif", subCategory: "Mobil" },
-        { name: "Motor", category: "Otomotif", subCategory: "Motor" },
-        { name: "Tips", category: "Otomotif", subCategory: "Tips" },
+        { name: "Lifestyle", category: "Lainnya", subCategory: "Lifestyle" },
+        { name: "Budaya", category: "Lainnya", subCategory: "Budaya" },
+        { name: "Wisata", category: "Lainnya", subCategory: "Wisata" },
+        { name: "Kuliner", category: "Lainnya", subCategory: "Kuliner" },
+        { name: "Hiburan", category: "Lainnya", subCategory: "Hiburan" },
+        { name: "Opini", category: "Lainnya", subCategory: "Opini" },
       ]
-    },
-    {
-      name: { ID: "LIFESTYLE", EN: "LIFESTYLE" },
-      category: "Lifestyle",
-      subItems: [
-        { name: "Wisata", category: "Lifestyle", subCategory: "Wisata" },
-        { name: "Kuliner", category: "Lifestyle", subCategory: "Kuliner" },
-        { name: "Budaya", category: "Lifestyle", subCategory: "Budaya" },
-        { name: "Hiburan", category: "Lifestyle", subCategory: "Hiburan" },
-      ]
-    },
-    { name: { ID: "OPINI", EN: "OPINION" }, category: "Opini" }
+    }
   ];
 
   const mobileFlatCategories = [
     { name: { ID: "BERANDA", EN: "HOME" }, category: null, subCategory: null },
-    { name: { ID: "Berita", EN: "News" }, category: "Berita", subCategory: null },
-    { name: { ID: "Politik", EN: "Politics" }, category: "Berita", subCategory: "Politik" },
-    { name: { ID: "Pemerintahan", EN: "Government" }, category: "Berita", subCategory: "Pemerintahan" },
-    { name: { ID: "Hukum", EN: "Law" }, category: "Berita", subCategory: "Hukum" },
-    { name: { ID: "Kriminal", EN: "Crime" }, category: "Berita", subCategory: "Kriminal" },
-    { name: { ID: "Pendidikan", EN: "Education" }, category: "Berita", subCategory: "Pendidikan" },
-    { name: { ID: "Ekonomi", EN: "Economy" }, category: "Berita", subCategory: "Ekonomi" },
-    { name: { ID: "Kesehatan", EN: "Health" }, category: "Berita", subCategory: "Kesehatan" },
-    { name: { ID: "Daerah", EN: "Regions" }, category: "Daerah", subCategory: null },
     { name: { ID: "Bangkalan", EN: "Bangkalan" }, category: "Daerah", subCategory: "Bangkalan" },
     { name: { ID: "Sampang", EN: "Sampang" }, category: "Daerah", subCategory: "Sampang" },
     { name: { ID: "Pamekasan", EN: "Pamekasan" }, category: "Daerah", subCategory: "Pamekasan" },
     { name: { ID: "Sumenep", EN: "Sumenep" }, category: "Daerah", subCategory: "Sumenep" },
-    { name: { ID: "Madura Raya", EN: "Great Madura" }, category: "Daerah", subCategory: "Madura Raya" },
-    { name: { ID: "Nasional", EN: "National" }, category: "Nasional", subCategory: null },
+    { name: { ID: "Politik", EN: "Politics" }, category: "Nasional", subCategory: "Politik" },
+    { name: { ID: "Pemerintahan", EN: "Government" }, category: "Nasional", subCategory: "Pemerintahan" },
+    { name: { ID: "Hukum", EN: "Law" }, category: "Nasional", subCategory: "Hukum" },
+    { name: { ID: "Kriminal", EN: "Crime" }, category: "Nasional", subCategory: "Kriminal" },
+    { name: { ID: "Pendidikan", EN: "Education" }, category: "Nasional", subCategory: "Pendidikan" },
+    { name: { ID: "Kesehatan", EN: "Health" }, category: "Nasional", subCategory: "Kesehatan" },
+    { name: { ID: "Ekonomi", EN: "Economy" }, category: "Nasional", subCategory: "Ekonomi" },
     { name: { ID: "Olahraga", EN: "Sports" }, category: "Olahraga", subCategory: null },
-    { name: { ID: "Sepak Bola", EN: "Football" }, category: "Olahraga", subCategory: "Sepak Bola" },
-    { name: { ID: "Bola Voli", EN: "Volleyball" }, category: "Olahraga", subCategory: "Bola Voli" },
-    { name: { ID: "Basket", EN: "Basketball" }, category: "Olahraga", subCategory: "Basket" },
-    { name: { ID: "MotoGP", EN: "MotoGP" }, category: "Olahraga", subCategory: "MotoGP" },
     { name: { ID: "Teknologi", EN: "Technology" }, category: "Teknologi", subCategory: null },
-    { name: { ID: "Gadget", EN: "Gadget" }, category: "Teknologi", subCategory: "Gadget" },
-    { name: { ID: "AI", EN: "AI" }, category: "Teknologi", subCategory: "AI" },
-    { name: { ID: "Internet", EN: "Internet" }, category: "Teknologi", subCategory: "Internet" },
-    { name: { ID: "Startup", EN: "Startup" }, category: "Teknologi", subCategory: "Startup" },
     { name: { ID: "Otomotif", EN: "Automotive" }, category: "Otomotif", subCategory: null },
-    { name: { ID: "Mobil", EN: "Car" }, category: "Otomotif", subCategory: "Mobil" },
-    { name: { ID: "Motor", EN: "Motorcycle" }, category: "Otomotif", subCategory: "Motor" },
-    { name: { ID: "Tips", EN: "Tips" }, category: "Otomotif", subCategory: "Tips" },
-    { name: { ID: "Lifestyle", EN: "Lifestyle" }, category: "Lifestyle", subCategory: null },
-    { name: { ID: "Wisata", EN: "Tourism" }, category: "Lifestyle", subCategory: "Wisata" },
-    { name: { ID: "Kuliner", EN: "Culinary" }, category: "Lifestyle", subCategory: "Kuliner" },
-    { name: { ID: "Budaya", EN: "Culture" }, category: "Lifestyle", subCategory: "Budaya" },
-    { name: { ID: "Hiburan", EN: "Entertainment" }, category: "Lifestyle", subCategory: "Hiburan" },
-    { name: { ID: "Opini", EN: "Opinion" }, category: "Opini", subCategory: null }
+    { name: { ID: "Lifestyle", EN: "Lifestyle" }, category: "Lainnya", subCategory: "Lifestyle" },
+    { name: { ID: "Budaya", EN: "Culture" }, category: "Lainnya", subCategory: "Budaya" },
+    { name: { ID: "Wisata", EN: "Tourism" }, category: "Lainnya", subCategory: "Wisata" },
+    { name: { ID: "Kuliner", EN: "Culinary" }, category: "Lainnya", subCategory: "Kuliner" },
+    { name: { ID: "Hiburan", EN: "Entertainment" }, category: "Lainnya", subCategory: "Hiburan" },
+    { name: { ID: "Opini", EN: "Opinion" }, category: "Lainnya", subCategory: "Opini" }
   ];
 
   const isItemActive = (item: any) => {
@@ -636,7 +597,11 @@ export default function PortalHeader({
                           href={href}
                           onClick={(e) => {
                             e.preventDefault();
-                            onCategorySelect(item.category);
+                            if (item.category) {
+                              onCategorySelect(item.category);
+                            } else {
+                              setActiveDropdown(isDropdownOpen ? null : menuKey);
+                            }
                           }}
                           onFocus={() => setActiveDropdown(menuKey)}
                           onKeyDown={(e) => handleKeyDown(e, menuKey)}

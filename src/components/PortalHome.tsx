@@ -440,7 +440,7 @@ export default function PortalHome({
     const totalCategoryPages = Math.ceil(sourceArticles.length / ITEMS_PER_PAGE_KATEGORI);
     const paginatedArticles = sourceArticles.slice((categoryPage - 1) * ITEMS_PER_PAGE_KATEGORI, categoryPage * ITEMS_PER_PAGE_KATEGORI);
     
-    const catTheme = getCategoryTheme(selectedCategory);
+    const catTheme = getCategoryTheme(selectedSubCategory || selectedCategory);
     const categoryViews = filteredArticles.reduce((sum, a) => sum + (a.views || 0), 0);
     
     const catTagsSet = new Set<string>();
@@ -766,12 +766,13 @@ export default function PortalHome({
         <div className="bg-white border border-gray-100 rounded-2xl p-6 sm:p-8 mb-8 shadow-xs flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
           <div className="flex items-start gap-4">
             <div className={`p-4.5 rounded-xl ${catTheme.bg} border ${catTheme.border} flex items-center justify-center shrink-0`}>
-              {getCategoryIcon(selectedCategory)}
+              {getCategoryIcon(selectedSubCategory || selectedCategory)}
             </div>
             <div>
               <div className="flex items-center gap-2 mb-1 flex-wrap">
                 <span className={`text-[10px] font-black uppercase tracking-widest ${catTheme.text}`}>
                   {lang === "ID" ? "KANAL POROS" : "POROS CHANNEL"}
+                  {selectedSubCategory && <span className="ml-1 opacity-70">• {selectedCategory.toUpperCase()}</span>}
                 </span>
                 <span className="text-gray-300 text-xs">•</span>
                 <span className="text-[10px] text-gray-500 font-mono flex items-center gap-1">
@@ -780,10 +781,10 @@ export default function PortalHome({
                 </span>
               </div>
               <h1 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight font-sans">
-                {selectedCategory.toUpperCase()}
+                {(selectedSubCategory || selectedCategory).toUpperCase()}
               </h1>
               <p className="text-gray-500 text-xs sm:text-sm mt-1.5 leading-relaxed max-w-2xl font-light">
-                {getCategoryDescription(selectedCategory)}
+                {getCategoryDescription(selectedSubCategory || selectedCategory)}
               </p>
             </div>
           </div>
