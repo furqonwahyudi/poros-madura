@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useAdSystem } from "../context/AdContext";
-import { AdSlot } from "../types";
+import { useAdSystem } from "../../context/AdContext";
+import { AdSlot } from "../../types";
 
 /**
  * ═══════════════════════════════════════════════════════════════════════════

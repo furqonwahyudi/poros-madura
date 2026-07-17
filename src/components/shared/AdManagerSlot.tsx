@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useAdSystem } from "../context/AdContext";
-import { Ad, AdSlot } from "../types";
+import { useAdSystem } from "../../context/AdContext";
+import { Ad, AdSlot } from "../../types";
 import { X } from "lucide-react";
 
 interface AdManagerSlotProps {

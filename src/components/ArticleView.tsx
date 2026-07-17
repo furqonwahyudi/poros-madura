@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Article, Comment } from "../types";
 import { dummyArticles } from "../data/dummyArticles";
-import AdManagerSlot from "./AdManagerSlot";
-import { formatDate } from "../utils";
+import AdManagerSlot from "./shared/AdManagerSlot";
+import { formatDate } from "../lib/utils";
 import { 
   Calendar, Clock, User, Share2, Eye, Award, Sparkles, Send, 
   ThumbsUp, MessageSquare, ArrowLeft, Check, Copy, Bookmark, BookmarkCheck 
