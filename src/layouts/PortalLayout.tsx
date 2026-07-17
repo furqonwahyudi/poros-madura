@@ -57,9 +57,11 @@ export default function PortalLayout() {
   };
 
   return (
-    <div id="portal-root" className="flex flex-col min-h-screen bg-[#FAFAFB]">
-      {/* Global Top Billboard (above everything, full-width) */}
-      <AdManagerSlot slug="top-billboard" page={currentPage} category={selectedCategory} />
+    <div id="portal-root" className="flex flex-col min-h-screen">
+      {/* Global Top Billboard (above everything, full-width) - Sticky behind content */}
+      <div className="sticky top-0 z-0">
+        <AdManagerSlot slug="top-billboard" page={currentPage} category={selectedCategory} />
+      </div>
 
       {/* Popup / Interstitial overlay */}
       <AdManagerSlot slug="popup-interstitial" page={currentPage} category={selectedCategory} />
